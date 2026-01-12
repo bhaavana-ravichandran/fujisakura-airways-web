@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
 export default function FlightsPage() {
   const router = useRouter();
@@ -255,32 +257,39 @@ export default function FlightsPage() {
   };
 
   return (
-    <div style={styles.container}>
-      {/* Background Planes */}
-      <div style={styles.planesContainer}>
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              ...styles.plane,
-              top: `${15 + (i * 15)}%`,
-              animationDelay: `${i * 3}s`,
-              animationDuration: `${15 + (i * 2)}s`,
-              opacity: 0.2
-            }}
-          >
-            ✈️
-          </div>
-        ))}
+    <div style={styles.pageContainer}>
+      {/* Header */}
+      <div className="relative z-20">
+        <Header />
       </div>
 
-      {/* Main Content */}
-      <div style={{
-        ...styles.contentContainer,
-        opacity: isLoaded ? 1 : 0,
-        transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
-        transition: 'all 0.8s ease-out'
-      }}>
+      {/* Main Content Container */}
+      <div style={styles.container}>
+        {/* Background Planes */}
+        <div style={styles.planesContainer}>
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              style={{
+                ...styles.plane,
+                top: `${15 + (i * 15)}%`,
+                animationDelay: `${i * 3}s`,
+                animationDuration: `${15 + (i * 2)}s`,
+                opacity: 0.2
+              }}
+            >
+              ✈️
+            </div>
+          ))}
+        </div>
+
+        {/* Main Content */}
+        <div style={{
+          ...styles.contentContainer,
+          opacity: isLoaded ? 1 : 0,
+          transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
+          transition: 'all 0.8s ease-out'
+        }}>
         {/* Header */}
         <div style={styles.header}>
           <h1 style={styles.title}>Flight Results</h1>
@@ -369,19 +378,33 @@ export default function FlightsPage() {
             )}
           </p>
         </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-20">
+        <Footer />
       </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
+  pageContainer: {
     minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
     background: 'linear-gradient(135deg, #87CEEB 0%, #98D8E8 25%, #B0E0E6 50%, #E0F6FF 75%, #F0F8FF 100%)',
-    padding: '20px',
-    position: 'relative',
-    overflow: 'hidden',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  
+  container: {
+    flex: 1,
+    padding: '20px',
+    paddingTop: '100px', // Account for fixed header
+    paddingBottom: '80px', // Account for footer
+    position: 'relative',
+    overflow: 'hidden'
   },
   
   planesContainer: {

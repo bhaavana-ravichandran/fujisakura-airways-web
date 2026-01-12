@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
 export default function HomePage() {
   const router = useRouter();
@@ -188,39 +190,46 @@ export default function HomePage() {
   };
 
   return (
-    <div style={styles.container}>
-      {/* Animated Planes Background */}
-      <div style={styles.planesContainer}>
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              ...styles.plane,
-              top: `${10 + (i * 12)}%`,
-              animationDelay: `${i * 2}s`,
-              animationDuration: `${12 + (i * 2)}s`,
-              opacity: 0.3 + (i * 0.05)
-            }}
-          >
-            ✈️
-          </div>
-        ))}
+    <div style={styles.pageContainer}>
+      {/* Header */}
+      <div className="relative z-20">
+        <Header />
       </div>
 
-      {/* Main Content */}
-      <Card 
-        className="w-[400px] relative z-10"
-        style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: '15px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
-          backdropFilter: 'blur(10px)',
-          border: '2px solid white',
-          opacity: isLoaded ? 1 : 0,
-          transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'all 0.8s ease-out'
-        }}
-      >
+      {/* Main Content Container */}
+      <div style={styles.container}>
+        {/* Animated Planes Background */}
+        <div style={styles.planesContainer}>
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              style={{
+                ...styles.plane,
+                top: `${10 + (i * 12)}%`,
+                animationDelay: `${i * 2}s`,
+                animationDuration: `${12 + (i * 2)}s`,
+                opacity: 0.3 + (i * 0.05)
+              }}
+            >
+              ✈️
+            </div>
+          ))}
+        </div>
+
+        {/* Main Content */}
+        <Card 
+          className="w-[400px] relative z-10"
+          style={{
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '15px',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '2px solid white',
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'all 0.8s ease-out'
+          }}
+        >
         <CardHeader style={{ textAlign: 'center', paddingBottom: '10px', padding: '30px 30px 10px 30px' }}>
           <CardTitle 
             style={{
@@ -499,21 +508,35 @@ export default function HomePage() {
           )}
         </CardContent>
       </Card>
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-20">
+        <Footer />
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
+  pageContainer: {
     minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
     background: 'linear-gradient(135deg, #87CEEB 0%, #98D8E8 25%, #B0E0E6 50%, #E0F6FF 75%, #F0F8FF 100%)',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  
+  container: {
+    flex: 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     padding: '20px',
+    paddingTop: '100px', // Account for fixed header
+    paddingBottom: '80px', // Account for footer
     position: 'relative',
-    overflow: 'hidden',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    overflow: 'hidden'
   },
   
   planesContainer: {
