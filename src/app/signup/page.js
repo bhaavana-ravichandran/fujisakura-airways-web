@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { validateSignupForm, formatPhoneNumber } from '../../utils/helpers';
 import '../../styles/globals.css';
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -76,10 +78,10 @@ export default function SignupPage() {
     setErrors({});
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Here you would typically make an API call to register the user
+      // Mock registration - in real app, this would be API call
       console.log('Signup attempt:', {
         fullName: formData.fullName,
         email: formData.email,
@@ -87,17 +89,8 @@ export default function SignupPage() {
         // Don't log passwords in production
       });
       
-      // For demo purposes, show success
-      alert('Account created successfully! (This is a demo)');
-      
-      // Reset form
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: ''
-      });
+      // Successful registration - redirect to home page
+      router.push('/home');
       
     } catch (error) {
       setErrors({

@@ -10,6 +10,7 @@ export default function PaymentPage() {
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [passengerDetails, setPassengerDetails] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     // Check if required data exists in localStorage
@@ -31,6 +32,15 @@ export default function PaymentPage() {
       router.push('/home');
     }
   }, [router]);
+
+  const handleProceedToPay = () => {
+    setShowToast(true);
+  };
+
+  const handleToastClose = () => {
+    setShowToast(false);
+    router.push('/home');
+  };
 
   const formatCityName = (cityCode) => {
     if (!cityCode) return '';
@@ -95,10 +105,7 @@ export default function PaymentPage() {
               ← Back to Passenger Details
             </button>
             <button
-              onClick={() => {
-                alert('Payment functionality will be implemented later');
-                router.push('/home');
-              }}
+              onClick={handleProceedToPay}
               style={styles.payButton}
             >
               Proceed to Pay
@@ -111,6 +118,26 @@ export default function PaymentPage() {
       <div className="relative z-20">
         <Footer />
       </div>
+
+      {/* Toast Modal */}
+      {showToast && (
+        <div style={styles.toastOverlay}>
+          <div style={styles.toastModal}>
+            <div style={styles.toastContent}>
+              <p style={styles.toastMessage}>
+                Payment integration will be implemented in a later phase.
+              </p>
+              <button
+                onClick={handleToastClose}
+                style={styles.toastButton}
+                className="toast-button"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -226,5 +253,60 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 15px rgba(40, 167, 69, 0.3)'
+  },
+  
+  // Toast Modal Styles
+  toastOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backdropFilter: 'blur(4px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    animation: 'fadeIn 0.3s ease-out'
+  },
+  
+  toastModal: {
+    background: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: '16px',
+    padding: '0',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    maxWidth: '400px',
+    width: '90%',
+    animation: 'slideIn 0.3s ease-out'
+  },
+  
+  toastContent: {
+    padding: '30px',
+    textAlign: 'center'
+  },
+  
+  toastMessage: {
+    fontSize: '1.1rem',
+    color: '#2c3e50',
+    marginBottom: '25px',
+    lineHeight: '1.5',
+    fontWeight: '500'
+  },
+  
+  toastButton: {
+    background: 'linear-gradient(135deg, #007bff, #0056b3)',
+    color: 'white',
+    border: 'none',
+    padding: '12px 30px',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(0, 123, 255, 0.3)',
+    minWidth: '100px'
   }
 };

@@ -3,13 +3,11 @@
 export const validateSignupForm = (formData) => {
   const errors = {};
 
-  // Name validation
-  if (!formData.firstName?.trim()) {
-    errors.firstName = 'First name is required';
-  }
-  
-  if (!formData.lastName?.trim()) {
-    errors.lastName = 'Last name is required';
+  // Full name validation
+  if (!formData.fullName?.trim()) {
+    errors.fullName = 'Full name is required';
+  } else if (formData.fullName.trim().length < 2) {
+    errors.fullName = 'Full name must be at least 2 characters long';
   }
 
   // Email validation

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     identifier: '', // Can be email or phone
     password: ''
@@ -52,16 +54,17 @@ export default function LoginPage() {
     setErrors({});
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Mock validation - in real app, this would be API call
       console.log('Login attempt:', {
         identifier: formData.identifier,
         // Don't log passwords in production
       });
       
-      // For demo purposes, show success
-      alert('Login successful! (This is a demo)');
+      // Successful login - redirect to home page
+      router.push('/home');
       
     } catch (error) {
       setErrors({
