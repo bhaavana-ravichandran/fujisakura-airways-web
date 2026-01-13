@@ -250,6 +250,20 @@ export default function FlightsPage() {
     router.push('/home');
   };
 
+  const handleSelectFlight = (flight) => {
+    // Store selected flight data in localStorage
+    const flightData = {
+      ...flight,
+      searchCriteria: searchCriteria,
+      selectedAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('selectedFlight', JSON.stringify(flightData));
+    
+    // Navigate to passenger details page
+    router.push('/passenger-details');
+  };
+
   const formatCityName = (cityCode) => {
     return cityCode.split('-').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
@@ -351,8 +365,11 @@ export default function FlightsPage() {
                     </div>
                   </div>
 
-                  <button style={styles.selectButton}>
-                    Select Flight
+                  <button 
+                    style={styles.selectButton}
+                    onClick={() => handleSelectFlight(flight)}
+                  >
+                    Book Now
                   </button>
                 </div>
               </div>
