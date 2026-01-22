@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { handleAlphabetsOnly, handleDigitsOnly, handlePhoneInput, isValidEmail, isValidAge } from '../../utils/inputValidation';
+import { formatPrice, getCurrencyFromData } from '../../utils/currency';
 
 export default function PassengerDetailsPage() {
   const router = useRouter();
@@ -34,6 +36,7 @@ export default function PassengerDetailsPage() {
         middleName: '',
         lastName: '',
         gender: '',
+        age: '',
         email: index === 0 ? '' : undefined, // Only primary passenger
         phone: index === 0 ? '' : undefined  // Only primary passenger
       }));
@@ -47,10 +50,21 @@ export default function PassengerDetailsPage() {
   }, [router]);
 
   const handleInputChange = (passengerIndex, field, value) => {
+    let processedValue = value;
+    
+    // Apply input restrictions based on field type
+    if (field === 'firstName' || field === 'middleName' || field === 'lastName') {
+      processedValue = handleAlphabetsOnly(value);
+    } else if (field === 'age') {
+      processedValue = handleDigitsOnly(value);
+    } else if (field === 'phone') {
+      processedValue = handlePhoneInput(value);
+    }
+    
     setPassengerDetails(prev => 
       prev.map((passenger, index) => 
         index === passengerIndex 
-          ? { ...passenger, [field]: value }
+          ? { ...passenger, [field]: processedValue }
           : passenger
       )
     );
@@ -80,17 +94,27 @@ export default function PassengerDetailsPage() {
         newErrors[`${index}-gender`] = 'Gender is required';
       }
       
+      // Age validation
+      if (!passenger.age) {
+        newErrors[`${index}-age`] = 'Age is required';
+      } else {
+        const age = parseInt(passenger.age);
+        if (isNaN(age) || age < 0 || age > 100) {
+          newErrors[`${index}-age`] = 'Age must be between 0 and 100';
+        }
+      }
+      
       // Additional fields for primary passenger
       if (index === 0) {
         if (!passenger.email.trim()) {
           newErrors[`${index}-email`] = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(passenger.email)) {
-          newErrors[`${index}-email`] = 'Email is invalid';
+        } else if (!isValidEmail(passenger.email)) {
+          newErrors[`${index}-email`] = 'Please enter a valid email';
         }
         
         if (!passenger.phone.trim()) {
           newErrors[`${index}-phone`] = 'Phone number is required';
-        } else if (!/^\d{10}$/.test(passenger.phone.replace(/\D/g, ''))) {
+        } else if (passenger.phone.length !== 10) {
           newErrors[`${index}-phone`] = 'Phone number must be 10 digits';
         }
       }
@@ -155,7 +179,12 @@ export default function PassengerDetailsPage() {
             </div>
             <div style={styles.flightInfo}>
               <span>{selectedFlight.airline} - {selectedFlight.flightNumber}</span>
-              <span style={styles.price}>${selectedFlight.finalPrice}</span>
+              <span style={styles.price}>
+                {selectedFlight.pricing 
+                  ? selectedFlight.pricing.total.formatted 
+                  : formatPrice(selectedFlight.finalPrice, getCurrencyFromData(selectedFlight))
+                }
+              </span>
             </div>
           </div>
         </div>
@@ -239,6 +268,26 @@ export default function PassengerDetailsPage() {
                   </select>
                   {errors[`${index}-gender`] && (
                     <span style={styles.errorText}>{errors[`${index}-gender`]}</span>
+                  )}
+                </div>
+
+                {/* Age */}
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Age *</label>
+                  <input
+                    type="number"
+                    value={passenger.age}
+                    onChange={(e) => handleInputChange(index, 'age', e.target.value)}
+                    style={{
+                      ...styles.input,
+                      ...(errors[`${index}-age`] ? styles.inputError : {})
+                    }}
+                    placeholder="Enter age"
+                    min="0"
+                    max="100"
+                  />
+                  {errors[`${index}-age`] && (
+                    <span style={styles.errorText}>{errors[`${index}-age`]}</span>
                   )}
                 </div>
 

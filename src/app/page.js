@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -44,21 +43,41 @@ export default function LandingPage() {
       </div>
 
       {/* Header */}
-      <div className="relative z-20">
+      <div className="relative z-20" style={{ height: '80px' }}>
         <Header />
       </div>
       
       {/* Main Hero Section */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 pb-8 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+      <main 
+        className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 relative z-10" 
+        style={{ 
+          minHeight: 'calc(100vh - 160px)',
+          paddingTop: '2rem',
+          paddingBottom: '2rem'
+        }}
+      >
+        <div className="max-w-2xl mx-auto flex items-center justify-center" style={{ minHeight: '100%' }}>
+          {/* Hero Card */}
           <div 
-            className={`transition-all duration-1000 ease-out ${
+            className={`hero-card transition-all duration-1000 ease-out ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
+            style={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '20px',
+              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              textAlign: 'center',
+              maxWidth: '450px',
+              width: '100%',
+              margin: '0 auto',
+              padding: '2.5rem 2rem'
+            }}
           >
             {/* Main Heading */}
             <h1 
-              className={`text-4xl sm:text-5xl lg:text-6xl font-bold text-black mb-6 leading-tight transition-all duration-1000 ease-out ${
+              className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-6 leading-tight transition-all duration-1000 ease-out ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
               }`}
               style={{ transitionDelay: '200ms' }}
@@ -68,38 +87,83 @@ export default function LandingPage() {
             
             {/* Subtitle */}
             <p 
-              className={`text-lg sm:text-xl lg:text-2xl text-black mb-12 leading-relaxed max-w-3xl mx-auto transition-all duration-1000 ease-out ${
+              className={`text-base sm:text-lg text-gray-600 mb-8 leading-relaxed transition-all duration-1000 ease-out ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
               }`}
-              style={{ transitionDelay: '400ms' }}
+              style={{ 
+                transitionDelay: '400ms',
+                lineHeight: '1.6',
+                marginBottom: '2rem'
+              }}
             >
               Experience premium air travel with exceptional service and comfort.
-              <br className="hidden sm:block" />
-              Your journey begins here.
+              <br />
+              <br />
+              Your journey to extraordinary destinations begins here.
             </p>
             
             {/* Buttons */}
             <div 
-              className={`flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 transition-all duration-1000 ease-out ${
+              className={`flex flex-col gap-4 justify-center items-center mb-6 transition-all duration-1000 ease-out ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
               }`}
-              style={{ transitionDelay: '600ms' }}
+              style={{ 
+                transitionDelay: '600ms',
+                marginTop: '1.5rem'
+              }}
             >
-              <Link href="/login">
-                <Button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 min-w-[140px]"
+              <Link href="/login" style={{ width: '100%', maxWidth: '300px', marginBottom: '12px', textDecoration: 'none' }}>
+                <button 
+                  className="landing-button-primary"
+                  style={{
+                    background: 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)',
+                    color: 'white',
+                    fontWeight: '600',
+                    fontSize: '1rem',
+                    padding: '1rem 2rem',
+                    borderRadius: '12px',
+                    border: 'none',
+                    boxShadow: '0 4px 15px rgba(0, 123, 255, 0.3)',
+                    width: '100%',
+                    height: '52px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease'
+                  }}
                 >
                   Sign In
-                </Button>
+                </button>
               </Link>
               
-              <Link href="/signup">
-                <Button 
-                  variant="outline"
-                  className="bg-white hover:bg-gray-50 text-black border-2 border-black font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 min-w-[140px]"
+              <Link href="/signup" style={{ width: '100%', maxWidth: '300px', textDecoration: 'none' }}>
+                <button 
+                  className="landing-button-secondary"
+                  style={{
+                    background: 'white',
+                    color: '#374151',
+                    fontWeight: '600',
+                    fontSize: '1rem',
+                    padding: '1rem 2rem',
+                    borderRadius: '12px',
+                    border: '2px solid #e5e7eb',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+                    width: '100%',
+                    height: '52px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    textDecoration: 'none',
+                    transition: 'all 0.3s ease'
+                  }}
                 >
                   Create Account
-                </Button>
+                </button>
               </Link>
             </div>
             
@@ -108,11 +172,24 @@ export default function LandingPage() {
               className={`transition-all duration-1000 ease-out ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
               }`}
-              style={{ transitionDelay: '800ms' }}
+              style={{ 
+                transitionDelay: '800ms',
+                marginTop: '1rem'
+              }}
             >
               <Link 
                 href="/forgot-password" 
-                className="text-black underline hover:text-gray-700 transition-colors duration-300 font-medium"
+                className="forgot-password-link"
+                style={{
+                  color: '#6b7280',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                  padding: '0.5rem',
+                  borderRadius: '6px',
+                  transition: 'color 0.2s ease'
+                }}
               >
                 Forgot your password?
               </Link>
@@ -122,7 +199,7 @@ export default function LandingPage() {
       </main>
       
       {/* Footer */}
-      <div className="relative z-20">
+      <div className="relative z-20" style={{ height: '80px' }}>
         <Footer />
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { standardizeFlightPricing } from '../../utils/currency';
 
 export default function FlightsPage() {
   const router = useRouter();
@@ -251,14 +252,17 @@ export default function FlightsPage() {
   };
 
   const handleSelectFlight = (flight) => {
-    // Store selected flight data in localStorage
+    // Store selected flight data with standardized pricing in localStorage
     const flightData = {
       ...flight,
       searchCriteria: searchCriteria,
       selectedAt: new Date().toISOString()
     };
     
-    localStorage.setItem('selectedFlight', JSON.stringify(flightData));
+    // Standardize pricing structure
+    const standardizedFlight = standardizeFlightPricing(flightData);
+    
+    localStorage.setItem('selectedFlight', JSON.stringify(standardizedFlight));
     
     // Navigate to passenger details page
     router.push('/passenger-details');

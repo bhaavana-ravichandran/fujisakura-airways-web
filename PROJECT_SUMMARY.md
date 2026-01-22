@@ -3,7 +3,7 @@
 ## 🎯 **Project Overview**
 A complete flight booking web application with modern UI/UX, built using Next.js App Router, shadcn/ui components, and following Figma design specifications for functionality implementation.
 
-## � **Curreont Project Structure**
+## 📁 **Current Project Structure**
 ```
 fujisakura-airways-web/
 ├── src/
@@ -15,8 +15,9 @@ fujisakura-airways-web/
 │   │   ├── layout.js                 # Root layout with metadata
 │   │   ├── login/page.js             # User authentication
 │   │   ├── page.js                   # Landing page (entry point)
-│   │   ├── passenger-details/page.js # Passenger info collection ✨ NEW
-│   │   ├── payment/page.js           # Payment processing (placeholder) ✨ NEW
+│   │   ├── passenger-details/page.js # Passenger info collection
+│   │   ├── payment/page.js           # Payment processing (placeholder)
+│   │   ├── booking-confirmation/page.js # Booking success page ✨ NEW
 │   │   ├── privacy/page.js           # Privacy policy page
 │   │   ├── signup/page.js            # User registration
 │   │   ├── support/page.js           # Customer support page
@@ -34,7 +35,8 @@ fujisakura-airways-web/
 │   ├── styles/
 │   │   └── globals.css               # Global styles & animations
 │   └── utils/
-│       └── helpers.js                # Form validation & utilities
+│       ├── helpers.js                # Form validation & utilities
+│       └── inputValidation.js        # Client-side input restrictions ✨ NEW
 ├── public/                           # Static assets (empty)
 ├── .gitignore                        # Git ignore rules
 ├── jsconfig.json                     # JavaScript configuration
@@ -88,10 +90,18 @@ fujisakura-airways-web/
 - ✅ Navigation flow: Flights → Passenger Details → Payment
 - ✅ Redirect protection for direct page access
 
+#### **Phase 6: Enhanced User Experience**
+- ✅ Advanced travellers selector (Adults + Children counters)
+- ✅ Age field added to passenger forms
+- ✅ Payment placeholder with professional toast modal
+- ✅ Booking confirmation page with Booking ID & PNR generation
+- ✅ Client-side input restrictions across all forms
+- ✅ Real-time validation for name, email, phone, age fields
+
 ### **🔄 CURRENT STATUS**
-**Active Development:** Payment system implementation
-**Last Updated:** January 2025
-**Current Flow:** Landing → Auth → Home → Flights → Passenger Details → Payment (placeholder)
+**Active Development:** My Bookings page (next priority)
+**Last Updated:** January 14, 2025
+**Current Flow:** Landing → Auth → Home → Flights → Passenger Details → Payment → Booking Confirmation
 
 ## 🛠️ **Technology Stack**
 
@@ -171,45 +181,71 @@ Passenger Info → localStorage → Payment Processing
 1. **Multi-Trip Support:** One-way, Round-trip, Multi-city
 2. **Fare Types:** Regular, Student (10% off), Armed Forces (20% off), Senior Citizen (15% off)
 3. **Dynamic Pricing:** Real-time discount calculations
-4. **Passenger Management:** Dynamic forms based on traveller count
-5. **Data Persistence:** localStorage for cross-page data retention
+4. **Advanced Travellers Selector:** Separate Adults & Children counters with +/- buttons
+5. **Passenger Management:** Dynamic forms with Age field for each passenger
+6. **Data Persistence:** localStorage for cross-page data retention
+7. **Booking Confirmation:** Auto-generated Booking ID (FJA-BK-XXXXXX) & PNR
 
 ### **User Experience**
-6. **Form Validation:** Real-time validation with error messages
-7. **Responsive Design:** Mobile-first, adaptive layouts
-8. **Loading States:** User feedback during form submissions
-9. **Navigation Protection:** Redirect handling for incomplete flows
-10. **Accessibility:** Proper labels, keyboard navigation, screen reader support
+8. **Form Validation:** Real-time validation with comprehensive error messages
+9. **Input Restrictions:** Alphabets-only for names, digits-only for age/phone, email validation
+10. **Responsive Design:** Mobile-first, adaptive layouts
+11. **Loading States:** User feedback during form submissions
+12. **Navigation Protection:** Redirect handling for incomplete flows
+13. **Professional Modals:** Toast notifications with blur overlay
+14. **Accessibility:** Proper labels, keyboard navigation, screen reader support
 
 ### **Visual Design**
-11. **Animated Backgrounds:** Flying airplane animations
-12. **Glass-morphism UI:** Modern transparent card designs
-13. **Smooth Transitions:** Hover effects, page transitions
-14. **Consistent Branding:** Fujisakura Airways theme throughout
-15. **Professional Typography:** Clean, readable font hierarchy
+15. **Animated Backgrounds:** Flying airplane animations
+16. **Glass-morphism UI:** Modern transparent card designs
+17. **Smooth Transitions:** Hover effects, page transitions
+18. **Consistent Branding:** Fujisakura Airways theme throughout
+19. **Professional Typography:** Clean, readable font hierarchy
+20. **Interactive Components:** Popover selectors, counter buttons, toast modals
 
 ## 📊 **Development Statistics**
 
 ### **Files & Code**
-- **Total Files:** 25+ (excluding node_modules)
-- **Pages Created:** 11 (including auth & booking pages)
+- **Total Files:** 27+ (excluding node_modules)
+- **Pages Created:** 12 (including booking confirmation)
 - **Components:** 8 (reusable UI components)
-- **Lines of Code:** ~3,500+
-  - JavaScript/JSX: ~2,800 lines
-  - CSS: ~400 lines
+- **Utility Files:** 2 (helpers.js, inputValidation.js)
+- **Lines of Code:** ~4,200+
+  - JavaScript/JSX: ~3,400 lines
+  - CSS: ~500 lines
   - Configuration: ~300 lines
 
 ### **Features Count**
-- **Completed Features:** 20+
-- **Pages with Full Functionality:** 8
-- **Form Validations:** 15+ validation rules
+- **Completed Features:** 25+
+- **Pages with Full Functionality:** 10
+- **Form Validations:** 20+ validation rules
+- **Input Restrictions:** 6 types (alphabets, digits, phone, email, age, password)
 - **Responsive Breakpoints:** 3 (mobile, tablet, desktop)
 
 ## 🚀 **Next Development Phase**
 
 ### **🔄 IMMEDIATE PRIORITIES (Based on Figma Design)**
 
-#### **1. Payment System Implementation**
+#### **1. My Bookings Page** 🎯 NEXT
+- **File:** `src/app/my-bookings/page.js` (new)
+- **Features:**
+  - Display all bookings from localStorage
+  - Booking cards with ID, PNR, flight details, status
+  - Filter: Upcoming / Completed / Cancelled
+  - View Details & Cancel Booking buttons
+  - Empty state handling
+  - Add "My Bookings" link in Header
+
+#### **2. Cancellation System**
+- **File:** `src/app/my-bookings/page.js` (enhance)
+- **Features:**
+  - Cancel booking functionality
+  - Refund policy display
+  - Cancellation confirmation modal
+  - Update booking status in localStorage
+  - Cancellation success feedback
+
+#### **3. Payment System Enhancement**
 - **File:** `src/app/payment/page.js` (replace placeholder)
 - **Features:**
   - Credit/Debit card form
@@ -217,7 +253,7 @@ Passenger Info → localStorage → Payment Processing
   - OTP verification flow
   - Payment validation & processing
 
-#### **2. Fare Type Enhancement**
+#### **4. Fare Type Enhancement**
 - **File:** `src/app/flights/page.js` (enhance existing)
 - **Features:**
   - Detailed fare comparison (Saver, Flexi plus, Super BF)
@@ -225,21 +261,11 @@ Passenger Info → localStorage → Payment Processing
   - Change/cancellation policies
   - Add-ons and services section
 
-#### **3. Booking Management System**
-- **Files:** 
-  - `src/app/booking-confirmation/page.js` (new)
-  - `src/app/my-bookings/page.js` (new)
-- **Features:**
-  - Booking confirmation with ID generation
-  - User booking history
-  - Booking status management
-  - Cancellation functionality
-
-#### **4. Advanced Features**
-- **Cancellation System:** Refund policies & processing
+#### **5. Advanced Features**
 - **Header Navigation Update:** Match Figma design
-- **Enhanced Validation:** More comprehensive form checks
-- **Error Handling:** Better user feedback systems
+- **Enhanced Flight Results:** Better filtering & sorting
+- **User Profile:** Account management
+- **Notifications:** Booking updates & alerts
 
 ### **🎯 FUTURE ROADMAP**
 - **Backend Integration:** API connections for real data
@@ -294,12 +320,14 @@ npm start
 ## 🎯 **Project Success Metrics**
 
 ### **✅ Achieved Goals**
-1. **Complete Booking Flow:** Landing → Auth → Search → Results → Passenger Details
-2. **Modern UI/UX:** Glass-morphism, animations, responsive design
-3. **Form Validation:** Comprehensive error handling
-4. **Data Persistence:** localStorage implementation
-5. **Component Reusability:** Header, Footer, UI components
-6. **Code Quality:** Clean, maintainable, well-organized
+1. **Complete Booking Flow:** Landing → Auth → Search → Results → Passenger Details → Payment → Confirmation
+2. **Modern UI/UX:** Glass-morphism, animations, responsive design, interactive components
+3. **Form Validation:** Comprehensive error handling with real-time validation
+4. **Input Restrictions:** Client-side validation for all input types
+5. **Data Persistence:** localStorage implementation across booking flow
+6. **Component Reusability:** Header, Footer, UI components
+7. **Code Quality:** Clean, maintainable, well-organized
+8. **Booking Management:** Auto-generated IDs, PNR, confirmation page
 
 ### **📊 Technical Achievements**
 - **Zero Build Errors:** Clean compilation
@@ -310,6 +338,49 @@ npm start
 
 ---
 
-**🚀 Ready for Next Phase:** Payment System Implementation
-**📅 Last Updated:** January 13, 2025
+## 📝 **Recent Updates (January 14, 2025)**
+
+### **✅ Completed Today**
+1. **Advanced Travellers Selector**
+   - Replaced simple dropdown with interactive popover
+   - Separate Adults & Children counters with +/- buttons
+   - Min/max validation (Adults min: 1, Children min: 0)
+   - Total count display
+
+2. **Age Field Addition**
+   - Added Age field to each passenger form
+   - Numeric input with 0-100 range validation
+   - Required field with error handling
+
+3. **Client-Side Input Restrictions**
+   - Created `inputValidation.js` utility file
+   - Alphabets-only for name fields
+   - Digits-only for age and phone
+   - Phone number exactly 10 digits
+   - Email validation
+   - Password minimum 6 characters
+   - Applied across: Passenger Details, Sign In, Sign Up, Forgot Password
+
+4. **Booking Confirmation Page**
+   - Success icon and confirmation message
+   - Auto-generated Booking ID (FJA-BK-XXXXXX format)
+   - Auto-generated PNR (6 alphanumeric characters)
+   - Flight summary display
+   - Passenger summary display
+   - Action buttons (View Bookings, Book Another Flight)
+
+5. **Payment Page Enhancement**
+   - Replaced browser alert with professional toast modal
+   - Blur overlay background
+   - Smooth animations
+   - "Payment integration will be implemented in a later phase" message
+   - Navigate to booking confirmation on close
+
+### **🎯 Next Priority**
+**My Bookings Page** - Display booking history with filter options and cancellation functionality
+
+---
+
+**🚀 Ready for Next Phase:** My Bookings & Cancellation System
+**📅 Last Updated:** January 14, 2025
 **👨‍💻 Development Status:** Active & On Track

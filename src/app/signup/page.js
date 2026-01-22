@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { validateSignupForm, formatPhoneNumber } from '../../utils/helpers';
+import { validateSignupForm } from '../../utils/helpers';
+import { handleAlphabetsOnly, handlePhoneInput, isValidPassword, doPasswordsMatch } from '../../utils/inputValidation';
 import '../../styles/globals.css';
 
 export default function SignupPage() {
@@ -24,17 +25,18 @@ export default function SignupPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    let processedValue = value;
     
-    // Format phone number as user types
-    let formattedValue = value;
-    if (name === 'phone') {
-      // Only allow digits and common phone formatting characters
-      formattedValue = value.replace(/[^\d\s\-\(\)]/g, '');
+    // Apply input restrictions based on field
+    if (name === 'fullName') {
+      processedValue = handleAlphabetsOnly(value);
+    } else if (name === 'phone') {
+      processedValue = handlePhoneInput(value);
     }
     
     setFormData(prev => ({
       ...prev,
-      [name]: formattedValue
+      [name]: processedValue
     }));
     
     // Clear error when user starts typing
@@ -47,20 +49,33 @@ export default function SignupPage() {
 
     // Real-time password match validation
     if (name === 'confirmPassword' || name === 'password') {
-      const password = name === 'password' ? formattedValue : formData.password;
-      const confirmPassword = name === 'confirmPassword' ? formattedValue : formData.confirmPassword;
+      const password = name === 'password' ? processedValue : formData.password;
+      const confirmPassword = name === 'confirmPassword' ? processedValue : formData.confirmPassword;
       
-      if (confirmPassword && password !== confirmPassword) {
+      if (confirmPassword && !doPasswordsMatch(password, confirmPassword)) {
         setErrors(prev => ({
           ...prev,
           confirmPassword: 'Passwords do not match'
         }));
-      } else if (confirmPassword && password === confirmPassword) {
+      } else if (confirmPassword && doPasswordsMatch(password, confirmPassword)) {
         setErrors(prev => ({
           ...prev,
           confirmPassword: ''
         }));
       }
+    }
+    
+    // Real-time password length validation
+    if (name === 'password' && processedValue && !isValidPassword(processedValue)) {
+      setErrors(prev => ({
+        ...prev,
+        password: 'Password must be at least 6 characters'
+      }));
+    } else if (name === 'password' && isValidPassword(processedValue)) {
+      setErrors(prev => ({
+        ...prev,
+        password: ''
+      }));
     }
   };
 
@@ -123,19 +138,22 @@ export default function SignupPage() {
 
       <main style={styles.main}>
         <Card 
-          className="w-full max-w-lg relative z-10"
+          className="w-full relative z-10"
           style={{
             background: 'rgba(255, 255, 255, 0.95)',
             borderRadius: '16px',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
+            maxWidth: '320px',
+            width: '320px',
+            minHeight: '500px'
           }}
         >
-          <CardHeader style={{ textAlign: 'center', padding: '2rem 2rem 1rem 2rem' }}>
+          <CardHeader style={{ textAlign: 'center', padding: '1.5rem 1.25rem 1rem 1.25rem' }}>
             <CardTitle 
               style={{
-                fontSize: '1.75rem',
+                fontSize: '1.4rem',
                 fontWeight: '600',
                 color: '#2d3748',
                 marginBottom: '0.5rem'
@@ -146,21 +164,22 @@ export default function SignupPage() {
             <CardDescription 
               style={{
                 color: '#718096',
-                fontSize: '0.95rem'
+                fontSize: '0.9rem',
+                lineHeight: '1.4'
               }}
             >
-              Join Fujisakura Airways for exclusive benefits
+              Join Fujisakura Airways
             </CardDescription>
           </CardHeader>
           
-          <CardContent style={{ padding: '0 2rem 2rem 2rem' }}>
+          <CardContent style={{ padding: '0 1.25rem 1.5rem 1.25rem' }}>
             {errors.general && (
               <div style={styles.errorContainer}>
                 {errors.general}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={styles.formGroup}>
                 <Label htmlFor="fullName" style={styles.label}>
                   Full Name <span style={{ color: '#e74c3c' }}>*</span>
@@ -278,13 +297,14 @@ export default function SignupPage() {
                   background: isLoading ? '#ccc' : 'linear-gradient(135deg, #007bff, #0056b3)',
                   color: 'white',
                   border: 'none',
-                  padding: '0.75rem 1.5rem',
+                  padding: '0.75rem 1.25rem',
                   borderRadius: '8px',
-                  fontSize: '1rem',
+                  fontSize: '0.95rem',
                   fontWeight: '600',
                   cursor: isLoading ? 'not-allowed' : 'pointer',
                   transition: 'all 0.3s ease',
-                  width: '100%'
+                  width: '100%',
+                  marginTop: '0.5rem'
                 }}
               >
                 {isLoading ? 'Creating Account...' : 'Create Account'}
@@ -343,9 +363,12 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '2rem',
+    padding: '1rem',
+    paddingTop: '100px',
+    paddingBottom: '60px',
     position: 'relative',
-    zIndex: 2
+    zIndex: 2,
+    minHeight: 'calc(100vh - 160px)'
   },
   
   formGroup: {
@@ -353,17 +376,17 @@ const styles = {
   },
   
   label: {
-    fontSize: '0.9rem',
+    fontSize: '0.85rem',
     fontWeight: '600',
     color: '#4a5568',
-    marginBottom: '0.5rem',
+    marginBottom: '0.4rem',
     display: 'block'
   },
   
   input: {
-    padding: '0.75rem 1rem',
+    padding: '0.65rem 0.85rem',
     borderRadius: '8px',
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     transition: 'all 0.3s ease',
     outline: 'none',
     background: 'white',

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { isValidEmail } from '../../utils/inputValidation';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -97,19 +98,22 @@ export default function LoginPage() {
 
       <main style={styles.main}>
         <Card 
-          className="w-full max-w-md relative z-10"
+          className="w-full relative z-10"
           style={{
             background: 'rgba(255, 255, 255, 0.95)',
             borderRadius: '16px',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
+            maxWidth: '320px',
+            width: '320px',
+            minHeight: '380px'
           }}
         >
-          <CardHeader style={{ textAlign: 'center', padding: '2rem 2rem 1rem 2rem' }}>
+          <CardHeader style={{ textAlign: 'center', padding: '1.5rem 1.25rem 1rem 1.25rem' }}>
             <CardTitle 
               style={{
-                fontSize: '1.75rem',
+                fontSize: '1.4rem',
                 fontWeight: '600',
                 color: '#2d3748',
                 marginBottom: '0.5rem'
@@ -120,21 +124,22 @@ export default function LoginPage() {
             <CardDescription 
               style={{
                 color: '#718096',
-                fontSize: '0.95rem'
+                fontSize: '0.9rem',
+                lineHeight: '1.4'
               }}
             >
-              Sign in to your Fujisakura Airways account
+              Sign in to your account
             </CardDescription>
           </CardHeader>
           
-          <CardContent style={{ padding: '0 2rem 2rem 2rem' }}>
+          <CardContent style={{ padding: '0 1.25rem 1.5rem 1.25rem' }}>
             {errors.general && (
               <div style={styles.errorContainer}>
                 {errors.general}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={styles.formGroup}>
                 <Label 
                   htmlFor="identifier"
@@ -161,7 +166,7 @@ export default function LoginPage() {
                     padding: '0.75rem 1rem',
                     border: errors.identifier ? '2px solid #e53e3e' : '2px solid #e2e8f0',
                     borderRadius: '8px',
-                    fontSize: '1rem',
+                    fontSize: '0.95rem',
                     transition: 'all 0.3s ease',
                     outline: 'none',
                     background: 'white'
@@ -198,7 +203,7 @@ export default function LoginPage() {
                     padding: '0.75rem 1rem',
                     border: errors.password ? '2px solid #e53e3e' : '2px solid #e2e8f0',
                     borderRadius: '8px',
-                    fontSize: '1rem',
+                    fontSize: '0.95rem',
                     transition: 'all 0.3s ease',
                     outline: 'none',
                     background: 'white'
@@ -216,13 +221,14 @@ export default function LoginPage() {
                   background: isLoading ? '#ccc' : 'linear-gradient(135deg, #007bff, #0056b3)',
                   color: 'white',
                   border: 'none',
-                  padding: '0.75rem 1.5rem',
+                  padding: '0.75rem 1.25rem',
                   borderRadius: '8px',
-                  fontSize: '1rem',
+                  fontSize: '0.95rem',
                   fontWeight: '600',
                   cursor: isLoading ? 'not-allowed' : 'pointer',
                   transition: 'all 0.3s ease',
-                  width: '100%'
+                  width: '100%',
+                  marginTop: '0.5rem'
                 }}
               >
                 {isLoading ? 'Signing In...' : 'Sign In'}
@@ -280,9 +286,12 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '2rem',
+    padding: '1rem',
+    paddingTop: '100px',
+    paddingBottom: '60px',
     position: 'relative',
-    zIndex: 2
+    zIndex: 2,
+    minHeight: 'calc(100vh - 160px)'
   },
   
   formGroup: {
@@ -308,13 +317,13 @@ const styles = {
   
   linkContainer: {
     textAlign: 'center',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
     fontSize: '0.9rem'
   },
   
   signupContainer: {
     textAlign: 'center',
-    marginTop: '1.5rem',
+    marginTop: '1.25rem',
     fontSize: '0.9rem',
     color: '#666'
   },

@@ -115,7 +115,7 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(-30px) scale(0.9);
   }
   to {
     opacity: 1;
@@ -123,8 +123,79 @@
   }
 }
 
+/* Enhanced toast animations */
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+}
+
 /* Toast button hover effects */
 .toast-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+/* Hero Card Responsive Styles */
+.hero-card {
+  padding: 2.5rem 2rem;
+}
+
+@media (min-width: 640px) {
+  .hero-card {
+    padding: 3rem 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-card {
+    padding: 3.5rem 3rem;
+  }
+}
+/* Landing Page Button Hover Effects */
+.landing-button-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.landing-button-secondary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border-color: #d1d5db;
+}
+
+.landing-button-primary:active {
+  transform: scale(0.98);
+}
+
+.landing-button-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Remove any text decoration from landing page links */
+a[href="/login"], a[href="/signup"] {
+  text-decoration: none !important;
+}
+
+a[href="/login"]:hover, a[href="/signup"]:hover {
+  text-decoration: none !important;
+}
+/* Subtle hover for forgot password only - no underline */
+.forgot-password-link {
+  text-decoration: none !important;
+}
+
+.forgot-password-link:hover {
+  color: #007bff !important;
+  text-decoration: none !important;
+}
+
+.forgot-password-link:focus,
+.forgot-password-link:active,
+.forgot-password-link:visited {
+  text-decoration: none !important;
 }

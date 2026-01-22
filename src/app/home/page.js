@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { handleAlphabetsOnly } from '../../utils/inputValidation';
 
 export default function HomePage() {
   const router = useRouter();
@@ -18,9 +19,17 @@ export default function HomePage() {
     departureDate: '',
     returnDate: '',
     tripType: 'round-trip',
-    travellers: '1',
     cabinClass: 'economy'
   });
+
+  // Travellers state
+  const [travellers, setTravellers] = useState({
+    adults: 1,
+    children: 0
+  });
+  
+  // Travellers popover state
+  const [showTravellersPopover, setShowTravellersPopover] = useState(false);
 
   // Fare type state
   const [fareType, setFareType] = useState('Regular');
@@ -58,6 +67,34 @@ export default function HomePage() {
   useEffect(() => {
     setIsLoaded(true);
   }, []);
+
+  // Travellers counter functions
+  const handleTravellersChange = (type, action) => {
+    setTravellers(prev => {
+      const newValue = { ...prev };
+      
+      if (action === 'increment') {
+        newValue[type] = prev[type] + 1;
+      } else if (action === 'decrement') {
+        if (type === 'adults' && prev.adults > 1) {
+          newValue[type] = prev[type] - 1;
+        } else if (type === 'children' && prev.children > 0) {
+          newValue[type] = prev[type] - 1;
+        }
+      }
+      
+      return newValue;
+    });
+  };
+
+  const getTotalTravellers = () => {
+    return travellers.adults + travellers.children;
+  };
+
+  const getTravellersText = () => {
+    const total = getTotalTravellers();
+    return `Travellers: ${total}`;
+  };
 
   // Mock flight data
   const mockFlightData = {
@@ -183,7 +220,9 @@ export default function HomePage() {
       searchParams.set('fareType', fareType);
       searchParams.set('cabin', formData.cabinClass);
       searchParams.set('tripType', formData.tripType);
-      searchParams.set('travellers', formData.travellers);
+      searchParams.set('travellers', getTotalTravellers().toString());
+      searchParams.set('adults', travellers.adults.toString());
+      searchParams.set('children', travellers.children.toString());
       
       router.push(`/flights?${searchParams.toString()}`);
     }, 1000);
@@ -438,18 +477,81 @@ export default function HomePage() {
           <div style={styles.inputRow}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Travellers</label>
-              <select
-                value={formData.travellers}
-                onChange={(e) => handleInputChange('travellers', e.target.value)}
-                style={styles.select}
-              >
-                <option value="1">1 Adult</option>
-                <option value="2">2 Adults</option>
-                <option value="3">3 Adults</option>
-                <option value="4">4 Adults</option>
-                <option value="2+1">2 Adults, 1 Child</option>
-                <option value="2+2">2 Adults, 2 Children</option>
-              </select>
+              <div style={styles.travellersContainer}>
+                <button
+                  type="button"
+                  onClick={() => setShowTravellersPopover(!showTravellersPopover)}
+                  style={styles.travellersButton}
+                >
+                  {getTravellersText()}
+                  <span style={styles.dropdownArrow}>▼</span>
+                </button>
+                
+                {showTravellersPopover && (
+                  <div style={styles.travellersPopover}>
+                    {/* Adults Row */}
+                    <div style={styles.travellerRow}>
+                      <span style={styles.travellerLabel}>Adults</span>
+                      <div style={styles.counterControls}>
+                        <button
+                          type="button"
+                          onClick={() => handleTravellersChange('adults', 'decrement')}
+                          disabled={travellers.adults <= 1}
+                          style={{
+                            ...styles.counterButton,
+                            ...(travellers.adults <= 1 ? styles.counterButtonDisabled : {})
+                          }}
+                        >
+                          −
+                        </button>
+                        <span style={styles.counterValue}>{travellers.adults}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleTravellersChange('adults', 'increment')}
+                          style={styles.counterButton}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Children Row */}
+                    <div style={styles.travellerRow}>
+                      <span style={styles.travellerLabel}>Children</span>
+                      <div style={styles.counterControls}>
+                        <button
+                          type="button"
+                          onClick={() => handleTravellersChange('children', 'decrement')}
+                          disabled={travellers.children <= 0}
+                          style={{
+                            ...styles.counterButton,
+                            ...(travellers.children <= 0 ? styles.counterButtonDisabled : {})
+                          }}
+                        >
+                          −
+                        </button>
+                        <span style={styles.counterValue}>{travellers.children}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleTravellersChange('children', 'increment')}
+                          style={styles.counterButton}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Done Button */}
+                    <button
+                      type="button"
+                      onClick={() => setShowTravellersPopover(false)}
+                      style={styles.doneButton}
+                    >
+                      Done
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Cabin Class</label>
@@ -788,6 +890,114 @@ const styles = {
     color: 'white',
     borderColor: '#007bff',
     boxShadow: '0 2px 8px rgba(0, 123, 255, 0.3)'
+  },
+  
+  // Travellers Popover Styles
+  travellersContainer: {
+    position: 'relative',
+    width: '100%'
+  },
+  
+  travellersButton: {
+    width: '100%',
+    padding: '10px 12px',
+    border: '2px solid #e9ecef',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    background: 'white',
+    cursor: 'pointer',
+    outline: 'none',
+    transition: 'border-color 0.3s ease',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    textAlign: 'left'
+  },
+  
+  dropdownArrow: {
+    fontSize: '0.7rem',
+    color: '#6c757d'
+  },
+  
+  travellersPopover: {
+    position: 'absolute',
+    top: 'calc(100% + 8px)',
+    left: 0,
+    width: '100%',
+    minWidth: '280px',
+    background: 'white',
+    border: '2px solid #e9ecef',
+    borderRadius: '8px',
+    padding: '15px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    zIndex: 1000
+  },
+  
+  travellerRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 0'
+  },
+  
+  travellerLabel: {
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    color: '#495057',
+    flex: 1
+  },
+  
+  counterControls: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '15px'
+  },
+  
+  counterButton: {
+    width: '36px',
+    height: '36px',
+    border: '2px solid #007bff',
+    borderRadius: '50%',
+    background: 'white',
+    color: '#007bff',
+    fontSize: '1.3rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.3s ease',
+    outline: 'none',
+    flexShrink: 0
+  },
+  
+  counterButtonDisabled: {
+    border: '2px solid #e9ecef',
+    color: '#ccc',
+    cursor: 'not-allowed',
+    opacity: 0.5
+  },
+  
+  counterValue: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#2c3e50',
+    minWidth: '40px',
+    textAlign: 'center'
+  },
+  
+  doneButton: {
+    width: '100%',
+    marginTop: '15px',
+    padding: '12px',
+    background: 'linear-gradient(135deg, #007bff, #0056b3)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
   }
 };
 

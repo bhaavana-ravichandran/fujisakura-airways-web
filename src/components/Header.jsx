@@ -66,6 +66,22 @@ export default function Header() {
               Flights
             </Link>
             <Link 
+              href="/my-bookings" 
+              style={headerStyles.navLink}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 1)';
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+              }}
+            >
+              My Bookings
+            </Link>
+            <Link 
               href="/support" 
               style={headerStyles.navLink}
               onMouseEnter={(e) => {

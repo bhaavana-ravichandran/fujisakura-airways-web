@@ -15,21 +15,21 @@ export const validateSignupForm = (formData) => {
   if (!formData.email?.trim()) {
     errors.email = 'Email is required';
   } else if (!emailRegex.test(formData.email)) {
-    errors.email = 'Please enter a valid email address';
+    errors.email = 'Please enter a valid email';
   }
 
   // Phone validation
   if (!formData.phone?.trim()) {
     errors.phone = 'Phone number is required';
-  } else if (formData.phone.replace(/\D/g, '').length < 10) {
-    errors.phone = 'Please enter a valid phone number';
+  } else if (formData.phone.length !== 10) {
+    errors.phone = 'Phone number must be 10 digits';
   }
 
   // Password validation
   if (!formData.password) {
     errors.password = 'Password is required';
-  } else if (formData.password.length < 8) {
-    errors.password = 'Password must be at least 8 characters long';
+  } else if (formData.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters';
   }
 
   // Confirm password validation

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { validateForgotPasswordForm } from '../../utils/helpers';
+import { isValidEmail } from '../../utils/inputValidation';
 import '../../styles/globals.css';
 
 export default function ForgotPasswordPage() {
@@ -14,11 +14,6 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
   const handleInputChange = (e) => {
     const { value } = e.target;
@@ -39,7 +34,7 @@ export default function ForgotPasswordPage() {
       return;
     }
     
-    if (!validateEmail(email)) {
+    if (!isValidEmail(email)) {
       setError('Please enter a valid email address');
       return;
     }
@@ -87,19 +82,22 @@ export default function ForgotPasswordPage() {
 
         <main style={styles.main}>
           <Card 
-            className="w-full max-w-md relative z-10"
+            className="w-full relative z-10"
             style={{
               background: 'rgba(255, 255, 255, 0.95)',
               borderRadius: '16px',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)',
               backdropFilter: 'blur(10px)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
+              maxWidth: '320px',
+              width: '320px',
+              minHeight: '400px'
             }}
           >
-            <CardHeader style={{ textAlign: 'center', padding: '2rem 2rem 1rem 2rem' }}>
+            <CardHeader style={{ textAlign: 'center', padding: '1.5rem 1.25rem 1rem 1.25rem' }}>
               <CardTitle 
                 style={{
-                  fontSize: '1.75rem',
+                  fontSize: '1.4rem',
                   fontWeight: '600',
                   color: '#2d3748',
                   marginBottom: '0.5rem'
@@ -110,14 +108,15 @@ export default function ForgotPasswordPage() {
               <CardDescription 
                 style={{
                   color: '#718096',
-                  fontSize: '0.95rem'
+                  fontSize: '0.85rem',
+                  lineHeight: '1.4'
                 }}
               >
-                We've sent password reset instructions to <strong>{email}</strong>
+                Instructions sent to <strong>{email}</strong>
               </CardDescription>
             </CardHeader>
             
-            <CardContent style={{ padding: '0 2rem 2rem 2rem' }}>
+            <CardContent style={{ padding: '0 1.25rem 1.5rem 1.25rem' }}>
               <div style={{
                 textAlign: 'center',
                 padding: '2rem 0',
@@ -153,9 +152,9 @@ export default function ForgotPasswordPage() {
                     background: 'linear-gradient(135deg, #007bff, #0056b3)',
                     color: 'white',
                     border: 'none',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
                     fontWeight: '600',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
@@ -171,9 +170,9 @@ export default function ForgotPasswordPage() {
                       background: '#f8f9fa',
                       color: '#333',
                       border: '1px solid #e1e5e9',
-                      padding: '0.75rem 1.5rem',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '6px',
+                      fontSize: '0.9rem',
                       fontWeight: '600',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
@@ -213,19 +212,22 @@ export default function ForgotPasswordPage() {
 
       <main style={styles.main}>
         <Card 
-          className="w-full max-w-md relative z-10"
+          className="w-full relative z-10"
           style={{
             background: 'rgba(255, 255, 255, 0.95)',
             borderRadius: '16px',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
+            maxWidth: '320px',
+            width: '320px',
+            minHeight: '350px'
           }}
         >
-          <CardHeader style={{ textAlign: 'center', padding: '2rem 2rem 1rem 2rem' }}>
+          <CardHeader style={{ textAlign: 'center', padding: '1.5rem 1.25rem 1rem 1.25rem' }}>
             <CardTitle 
               style={{
-                fontSize: '1.75rem',
+                fontSize: '1.4rem',
                 fontWeight: '600',
                 color: '#2d3748',
                 marginBottom: '0.5rem'
@@ -236,21 +238,22 @@ export default function ForgotPasswordPage() {
             <CardDescription 
               style={{
                 color: '#718096',
-                fontSize: '0.95rem'
+                fontSize: '0.85rem',
+                lineHeight: '1.4'
               }}
             >
-              Enter your registered email address. We'll send you instructions to reset your password.
+              Enter your email for reset instructions
             </CardDescription>
           </CardHeader>
           
-          <CardContent style={{ padding: '0 2rem 2rem 2rem' }}>
+          <CardContent style={{ padding: '0 1.25rem 1.5rem 1.25rem' }}>
             {error && (
               <div style={styles.errorContainer}>
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={styles.formGroup}>
                 <Label 
                   htmlFor="email"
@@ -277,7 +280,7 @@ export default function ForgotPasswordPage() {
                     padding: '0.75rem 1rem',
                     border: error ? '2px solid #e53e3e' : '2px solid #e2e8f0',
                     borderRadius: '8px',
-                    fontSize: '1rem',
+                    fontSize: '0.95rem',
                     transition: 'all 0.3s ease',
                     outline: 'none',
                     background: 'white'
@@ -292,13 +295,14 @@ export default function ForgotPasswordPage() {
                   background: isLoading ? '#ccc' : 'linear-gradient(135deg, #007bff, #0056b3)',
                   color: 'white',
                   border: 'none',
-                  padding: '0.75rem 1.5rem',
+                  padding: '0.75rem 1.25rem',
                   borderRadius: '8px',
-                  fontSize: '1rem',
+                  fontSize: '0.95rem',
                   fontWeight: '600',
                   cursor: isLoading ? 'not-allowed' : 'pointer',
                   transition: 'all 0.3s ease',
-                  width: '100%'
+                  width: '100%',
+                  marginTop: '0.5rem'
                 }}
               >
                 {isLoading ? 'Sending Instructions...' : 'Reset Password'}
@@ -356,9 +360,12 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '2rem',
+    padding: '1rem',
+    paddingTop: '100px',
+    paddingBottom: '60px',
     position: 'relative',
-    zIndex: 2
+    zIndex: 2,
+    minHeight: 'calc(100vh - 160px)'
   },
   
   formGroup: {
