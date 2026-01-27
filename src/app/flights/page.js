@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import BackButton from '../../components/BackButton';
 import { standardizeFlightPricing } from '../../utils/currency';
 
 export default function FlightsPage() {
@@ -402,6 +403,11 @@ export default function FlightsPage() {
         </div>
       </div>
 
+      {/* Back Button */}
+      <div style={styles.backButtonContainer}>
+        <BackButton customPath="/home" label="Back to Search" />
+      </div>
+
       {/* Footer */}
       <div className="relative z-20">
         <Footer />
@@ -426,6 +432,14 @@ const styles = {
     paddingBottom: '80px', // Account for footer
     position: 'relative',
     overflow: 'hidden'
+  },
+  
+  backButtonContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '2rem',
+    background: 'rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(10px)',
   },
   
   planesContainer: {

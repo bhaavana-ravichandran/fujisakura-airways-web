@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import BackButton from '../../components/BackButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatPrice, getCurrencyFromData, CURRENCY_CONFIG } from '../../utils/currency';
@@ -100,6 +101,11 @@ export default function MyBookingsPage() {
       <main style={styles.main}>
         <div style={styles.contentWrapper}>
           <h1 style={styles.pageTitle}>My Bookings</h1>
+
+          {/* Back Button */}
+          <div style={styles.backButtonContainer}>
+            <BackButton customPath="/home" label="Back to Home" />
+          </div>
 
           <div style={styles.filterContainer}>
             {['All', 'Upcoming', 'Completed', 'Cancelled'].map((filter) => (
@@ -302,6 +308,12 @@ const styles = {
     color: '#2d3748',
     marginBottom: '2rem',
     textAlign: 'center',
+  },
+  
+  backButtonContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '2rem',
   },
   
   filterContainer: {

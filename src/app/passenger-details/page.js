@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import BackButton from '../../components/BackButton';
 import { handleAlphabetsOnly, handleDigitsOnly, handlePhoneInput, isValidEmail, isValidAge } from '../../utils/inputValidation';
 import { formatPrice, getCurrencyFromData } from '../../utils/currency';
 
@@ -124,7 +125,7 @@ export default function PassengerDetailsPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
+  const handleContinueToSeatSelection = () => {
     if (!validateForm()) {
       return;
     }
@@ -132,7 +133,22 @@ export default function PassengerDetailsPage() {
     // Store passenger details in localStorage
     localStorage.setItem('passengerDetails', JSON.stringify(passengerDetails));
     
-    // Navigate to payment page (placeholder)
+    // Navigate to seat selection page
+    router.push('/seat-selection');
+  };
+
+  const handleSkipToPayment = () => {
+    if (!validateForm()) {
+      return;
+    }
+    
+    // Store passenger details in localStorage
+    localStorage.setItem('passengerDetails', JSON.stringify(passengerDetails));
+    
+    // Clear any existing seat selection data
+    localStorage.removeItem('seatSelection');
+    
+    // Navigate directly to payment page
     router.push('/payment');
   };
 
@@ -187,6 +203,11 @@ export default function PassengerDetailsPage() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Back Button */}
+        <div style={styles.backButtonContainer}>
+          <BackButton customPath="/flights" label="Back to Flights" />
         </div>
 
         {/* Passenger Details Form */}
@@ -342,12 +363,20 @@ export default function PassengerDetailsPage() {
             >
               ← Back to Flights
             </button>
-            <button
-              onClick={handleContinue}
-              style={styles.continueButton}
-            >
-              Continue to Payment →
-            </button>
+            <div style={styles.buttonGroup}>
+              <button
+                onClick={handleContinueToSeatSelection}
+                style={styles.continueButton}
+              >
+                Continue to Seat Selection →
+              </button>
+              <button
+                onClick={handleSkipToPayment}
+                style={styles.skipButton}
+              >
+                Skip to Payment
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -445,6 +474,12 @@ const styles = {
     fontSize: '1.2rem',
     fontWeight: '700',
     color: '#28a745'
+  },
+  
+  backButtonContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '2rem',
   },
   
   formContainer: {
@@ -558,5 +593,24 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 15px rgba(0, 123, 255, 0.3)'
+  },
+  
+  buttonGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    flex: 1,
+  },
+  
+  skipButton: {
+    background: 'white',
+    color: '#6b7280',
+    border: '2px solid #e5e7eb',
+    padding: '12px 24px',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
   }
 };

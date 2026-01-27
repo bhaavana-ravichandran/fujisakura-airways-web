@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import BackButton from '../../components/BackButton';
 import { formatPrice, getCurrencyFromData } from '../../utils/currency';
 
 export default function BookingConfirmationPage() {
@@ -57,6 +58,9 @@ export default function BookingConfirmationPage() {
         setPnr(newPnr);
         
         // Save booking to localStorage
+        const seatSelectionData = localStorage.getItem('seatSelection');
+        const seatSelection = seatSelectionData ? JSON.parse(seatSelectionData) : null;
+        
         const booking = {
           bookingId: newBookingId,
           pnr: newPnr,
@@ -71,6 +75,7 @@ export default function BookingConfirmationPage() {
             duration: flight.duration || 'N/A'
           },
           passengers: passengers,
+          seatSelection: seatSelection, // Include seat selection data
           status: 'Upcoming',
           bookingDate: new Date().toISOString()
         };
@@ -147,6 +152,11 @@ export default function BookingConfirmationPage() {
             <div style={styles.successIcon}>✓</div>
             <h1 style={styles.title}>Booking Confirmed!</h1>
             <p style={styles.subtitle}>Your flight has been successfully booked</p>
+          </div>
+
+          {/* Back Button */}
+          <div style={styles.backButtonContainer}>
+            <BackButton customPath="/home" label="Back to Home" />
           </div>
 
           {/* Booking Identifiers */}
@@ -318,6 +328,12 @@ const styles = {
   subtitle: {
     fontSize: '1.1rem',
     color: '#6c757d'
+  },
+  
+  backButtonContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '2rem',
   },
   
   identifiersSection: {

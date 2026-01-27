@@ -184,6 +184,12 @@ a[href="/login"], a[href="/signup"] {
 a[href="/login"]:hover, a[href="/signup"]:hover {
   text-decoration: none !important;
 }
+
+/* Loading Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 /* Subtle hover for forgot password only - no underline */
 .forgot-password-link {
   text-decoration: none !important;

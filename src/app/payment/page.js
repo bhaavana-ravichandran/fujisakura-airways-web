@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import BackButton from '../../components/BackButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,9 +40,13 @@ export default function PaymentPage() {
   // Digital wallet state
   const [selectedWallet, setSelectedWallet] = useState('');
 
+  // Seat selection state
+  const [seatSelection, setSeatSelection] = useState(null);
+
   useEffect(() => {
     const flightData = localStorage.getItem('selectedFlight');
     const passengerData = localStorage.getItem('passengerDetails');
+    const seatData = localStorage.getItem('seatSelection');
     
     if (!flightData || !passengerData) {
       router.push('/home');
@@ -51,6 +56,12 @@ export default function PaymentPage() {
     try {
       setSelectedFlight(JSON.parse(flightData));
       setPassengerDetails(JSON.parse(passengerData));
+      
+      // Load seat selection data if available
+      if (seatData) {
+        setSeatSelection(JSON.parse(seatData));
+      }
+      
       setIsLoaded(true);
     } catch (error) {
       console.error('Error parsing data:', error);
@@ -107,15 +118,22 @@ export default function PaymentPage() {
   const calculateTotalPrice = () => {
     if (!selectedFlight) return 0;
     
+    let flightTotal = 0;
+    
     // Use standardized pricing if available
     if (selectedFlight.pricing && selectedFlight.pricing.total) {
-      return selectedFlight.pricing.total.amount;
+      flightTotal = selectedFlight.pricing.total.amount;
+    } else {
+      // Fallback to legacy calculation
+      const basePrice = parseFloat(selectedFlight.finalPrice) || 0;
+      const taxes = Math.round(basePrice * 0.18);
+      flightTotal = basePrice + taxes;
     }
     
-    // Fallback to legacy calculation
-    const basePrice = parseFloat(selectedFlight.finalPrice) || 0;
-    const taxes = Math.round(basePrice * 0.18);
-    return basePrice + taxes;
+    // Add seat selection charges if available
+    const seatCharges = seatSelection ? seatSelection.totalSeatPrice : 0;
+    
+    return flightTotal + seatCharges;
   };
 
   const getFormattedPrice = (amount) => {
@@ -124,24 +142,43 @@ export default function PaymentPage() {
   };
 
   const getPriceBreakdown = () => {
+    let flightPricing;
+    
     if (selectedFlight.pricing) {
-      return {
+      flightPricing = {
         base: selectedFlight.pricing.base,
         taxes: selectedFlight.pricing.taxes,
         total: selectedFlight.pricing.total
       };
+    } else {
+      // Fallback for legacy data
+      const basePrice = parseFloat(selectedFlight.finalPrice) || 0;
+      const taxes = Math.round(basePrice * 0.18);
+      const total = basePrice + taxes;
+      const currency = getCurrencyFromData(selectedFlight);
+      
+      flightPricing = {
+        base: { amount: basePrice, formatted: formatPrice(basePrice, currency) },
+        taxes: { amount: taxes, formatted: formatPrice(taxes, currency) },
+        total: { amount: total, formatted: formatPrice(total, currency) }
+      };
     }
     
-    // Fallback for legacy data
-    const basePrice = parseFloat(selectedFlight.finalPrice) || 0;
-    const taxes = Math.round(basePrice * 0.18);
-    const total = basePrice + taxes;
+    // Add seat selection charges
+    const seatCharges = seatSelection ? seatSelection.totalSeatPrice : 0;
     const currency = getCurrencyFromData(selectedFlight);
+    const grandTotal = flightPricing.total.amount + seatCharges;
     
     return {
-      base: { amount: basePrice, formatted: formatPrice(basePrice, currency) },
-      taxes: { amount: taxes, formatted: formatPrice(taxes, currency) },
-      total: { amount: total, formatted: formatPrice(total, currency) }
+      flight: flightPricing,
+      seatCharges: {
+        amount: seatCharges,
+        formatted: formatPrice(seatCharges, currency)
+      },
+      grandTotal: {
+        amount: grandTotal,
+        formatted: formatPrice(grandTotal, currency)
+      }
     };
   };
 
@@ -182,6 +219,11 @@ export default function PaymentPage() {
       <main style={styles.main}>
         <div style={styles.contentWrapper}>
           <h1 style={styles.pageTitle}>Complete Your Payment</h1>
+          
+          {/* Back Button */}
+          <div style={styles.backButtonContainer}>
+            <BackButton customPath="/seat-selection" label="Back to Seat Selection" />
+          </div>
           
           <div style={styles.paymentContainer}>
             {/* Payment Summary */}
@@ -268,6 +310,59 @@ export default function PaymentPage() {
                     </div>
                   </div>
                   
+                  {/* Seat Selection Section */}
+                  {seatSelection && (
+                    <div style={styles.seatSelectionSection}>
+                      <div style={styles.seatHeader}>
+                        <span style={styles.seatTitle}>Seat Selection</span>
+                        <span style={styles.seatIcon}>💺</span>
+                      </div>
+                      
+                      <div style={styles.seatDetails}>
+                        <div style={styles.seatInfo}>
+                          <span style={styles.seatLabel}>Cabin Class:</span>
+                          <span style={styles.seatValue}>{seatSelection.cabinClass}</span>
+                        </div>
+                        {seatSelection.fareType && seatSelection.cabinClass === 'Economy' && (
+                          <div style={styles.seatInfo}>
+                            <span style={styles.seatLabel}>Fare Type:</span>
+                            <span style={styles.seatValue}>
+                              {seatSelection.fareType === 'saver' ? 'Economy Saver' : 
+                               seatSelection.fareType === 'base' ? 'Economy Base' : 
+                               seatSelection.fareType === 'green' ? 'Economy Green' : 
+                               seatSelection.fareType}
+                            </span>
+                          </div>
+                        )}
+                        {seatSelection.businessFareType && seatSelection.cabinClass === 'Business' && (
+                          <div style={styles.seatInfo}>
+                            <span style={styles.seatLabel}>Fare Type:</span>
+                            <span style={styles.seatValue}>
+                              {seatSelection.businessFareType === 'flex' ? 'Business Flex' : 
+                               seatSelection.businessFareType === 'premium' ? 'Business Premium' : 
+                               seatSelection.businessFareType === 'suite' ? 'Business Suite' : 
+                               seatSelection.businessFareType}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {seatSelection.seatSummary && seatSelection.seatSummary.length > 0 && (
+                        <div style={styles.selectedSeats}>
+                          {seatSelection.seatSummary.map((seatInfo, index) => (
+                            <div key={index} style={styles.seatItem}>
+                              <span style={styles.seatPassenger}>{seatInfo.passenger}</span>
+                              <span style={styles.seatNumber}>{seatInfo.seat}</span>
+                              <span style={styles.seatPrice}>
+                                {seatInfo.price > 0 ? `+${getFormattedPrice(seatInfo.price)}` : 'Free'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
                   {/* Enhanced Price Breakdown */}
                   <div style={styles.priceBreakdown}>
                     <div style={styles.priceHeader}>
@@ -278,12 +373,18 @@ export default function PaymentPage() {
                     <div style={styles.priceDetails}>
                       <div style={styles.priceRow}>
                         <span style={styles.priceLabel}>Base Fare ({passengerDetails.length} passenger{passengerDetails.length > 1 ? 's' : ''})</span>
-                        <span style={styles.priceValue}>{getPriceBreakdown().base.formatted}</span>
+                        <span style={styles.priceValue}>{getPriceBreakdown().flight.base.formatted}</span>
                       </div>
                       <div style={styles.priceRow}>
                         <span style={styles.priceLabel}>Taxes & Fees</span>
-                        <span style={styles.priceValue}>{getPriceBreakdown().taxes.formatted}</span>
+                        <span style={styles.priceValue}>{getPriceBreakdown().flight.taxes.formatted}</span>
                       </div>
+                      {seatSelection && seatSelection.totalSeatPrice > 0 && (
+                        <div style={styles.priceRow}>
+                          <span style={styles.priceLabel}>Seat Selection Charges</span>
+                          <span style={styles.priceValue}>{getPriceBreakdown().seatCharges.formatted}</span>
+                        </div>
+                      )}
                       <div style={styles.serviceFeeRow}>
                         <span style={styles.priceLabel}>Service Fee</span>
                         <span style={styles.serviceFee}>Included</span>
@@ -292,7 +393,7 @@ export default function PaymentPage() {
                     
                     <div style={styles.totalRow}>
                       <span style={styles.totalLabel}>Total Amount</span>
-                      <span style={styles.totalAmount}>{getPriceBreakdown().total.formatted}</span>
+                      <span style={styles.totalAmount}>{getPriceBreakdown().grandTotal.formatted}</span>
                     </div>
                   </div>
                   
@@ -606,6 +707,12 @@ const styles = {
     textAlign: 'center',
   },
   
+  backButtonContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '2rem',
+  },
+  
   loadingContainer: {
     flex: 1,
     display: 'flex',
@@ -833,6 +940,99 @@ const styles = {
   passengerAge: {
     fontSize: '0.85rem',
     color: 'rgba(255, 255, 255, 0.8)',
+  },
+  
+  // Seat Selection Styles
+  seatSelectionSection: {
+    background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+    color: '#2d3748',
+  },
+  
+  seatHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1rem',
+  },
+  
+  seatTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '700',
+    color: '#2d3748',
+  },
+  
+  seatIcon: {
+    fontSize: '1.5rem',
+    opacity: 0.8,
+  },
+  
+  seatDetails: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    background: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: '8px',
+    padding: '1rem',
+    marginBottom: '1rem',
+  },
+  
+  seatInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.25rem',
+  },
+  
+  seatLabel: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  
+  seatValue: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#2d3748',
+  },
+  
+  selectedSeats: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  
+  seatItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: '8px',
+    padding: '0.75rem',
+  },
+  
+  seatPassenger: {
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    color: '#374151',
+    flex: 1,
+  },
+  
+  seatNumber: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#2d3748',
+    background: 'rgba(59, 130, 246, 0.1)',
+    padding: '0.25rem 0.5rem',
+    borderRadius: '4px',
+    marginRight: '0.5rem',
+  },
+  
+  seatPrice: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#059669',
   },
   
   priceBreakdown: {
