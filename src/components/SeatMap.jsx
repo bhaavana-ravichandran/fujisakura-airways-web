@@ -1,6 +1,6 @@
 'use client';
 
-import { getSeatStatusColor, getSeatTypeDisplayName, calculateSeatPrice, ECONOMY_FARE_TYPES, BUSINESS_FARE_TYPES } from '../utils/seatUtils';
+import { getSeatStatusColor, getSeatTypeDisplayName, calculateSeatPrice, ECONOMY_FARE_TYPES, BUSINESS_FARE_TYPES, FIRST_CLASS_FARE_TYPES } from '../utils/seatUtils';
 import { formatPrice, CURRENCY_CONFIG } from '../utils/currency';
 
 export default function SeatMap({ 
@@ -9,7 +9,9 @@ export default function SeatMap({
   onSeatSelect, 
   cabinClass,
   fareType = 'base',
+  premiumEconomyFareType = 'standard',
   businessFareType = 'flex',
+  firstClassFareType = 'standard',
   disabled = false 
 }) {
   if (!seatMap) {
@@ -36,8 +38,10 @@ export default function SeatMap({
     onSeatSelect(seat.id, seat);
   };
 
-  // Determine if this is Business Class layout
+  // Determine cabin class layout
   const isBusinessClass = cabinClass === 'Business';
+  const isFirstClass = cabinClass === 'First';
+  const isPremiumEconomy = cabinClass === 'Premium Economy';
   const layoutConfig = seatMap.config;
 
   return (
@@ -92,7 +96,92 @@ export default function SeatMap({
           <div style={styles.guideSection}>
             <h5 style={styles.guideSectionTitle}>Seat Pricing</h5>
             <div style={styles.pricingItems}>
-              {isBusinessClass ? (
+              {isFirstClass ? (
+                // First Class pricing
+                <>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>✨</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>Premium Experience</span>
+                      <span style={styles.pricingPrice}>Included</span>
+                    </div>
+                  </div>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>💺</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>First Class Seat</span>
+                      <span style={styles.pricingPrice}>Included</span>
+                    </div>
+                  </div>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>👑</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>Suite Access</span>
+                      <span style={styles.pricingPrice}>
+                        {firstClassFareType === 'suite' ? 'Included' : 'Not Available'}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>🍽️</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>Dining</span>
+                      <span style={styles.pricingPrice}>
+                        {firstClassFareType === 'suite' ? 'À la carte' : 
+                         firstClassFareType === 'flex' ? 'Premium' : 'Gourmet'}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>🧳</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>Baggage</span>
+                      <span style={styles.pricingPrice}>
+                        {firstClassFareType === 'suite' ? '15kg + 50kg' : 
+                         firstClassFareType === 'flex' ? '10kg + 45kg' : '10kg + 40kg'}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : isPremiumEconomy ? (
+                // Premium Economy pricing
+                <>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>💺</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>Premium Seat</span>
+                      <span style={styles.pricingPrice}>+₹200</span>
+                    </div>
+                  </div>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>🦵</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>Extra Legroom</span>
+                      <span style={styles.pricingPrice}>+₹800</span>
+                    </div>
+                  </div>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>🧳</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>Baggage</span>
+                      <span style={styles.pricingPrice}>
+                        {premiumEconomyFareType === 'lite' ? '10kg + 30kg' : 
+                         premiumEconomyFareType === 'flex' ? '10kg + 35kg' : '10kg + 35kg'}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={styles.pricingItem}>
+                    <span style={styles.pricingIcon}>ℹ️</span>
+                    <div style={styles.pricingDetails}>
+                      <span style={styles.pricingType}>Fare Type</span>
+                      <span style={styles.pricingPrice}>
+                        {premiumEconomyFareType === 'lite' ? 'Lite' : 
+                         premiumEconomyFareType === 'flex' ? 'Flex' : 'Standard'}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : isBusinessClass ? (
                 // Business Class pricing
                 <>
                   <div style={styles.pricingItem}>
@@ -171,7 +260,29 @@ export default function SeatMap({
       </div>
 
       {/* Seat Layout Header - Dynamic based on cabin class */}
-      {isBusinessClass ? (
+      {isFirstClass ? (
+        <div style={styles.firstClassSeatHeaderGrid}>
+          <div style={styles.headerRowNumber}></div>
+          <div style={styles.headerGridA}>A</div>
+          <div style={styles.headerAisleWide}></div>
+          <div style={styles.headerGridF}>F</div>
+          <div style={styles.headerRowNumber}></div>
+        </div>
+      ) : isPremiumEconomy ? (
+        <div style={styles.premiumEconomySeatHeaderGrid}>
+          <div style={styles.headerRowNumber}></div>
+          <div style={styles.headerGridA}>A</div>
+          <div style={styles.headerGridB}>B</div>
+          <div style={styles.headerAislePremium}></div>
+          <div style={styles.headerGridC}>C</div>
+          <div style={styles.headerGridD}>D</div>
+          <div style={styles.headerGridE}>E</div>
+          <div style={styles.headerAislePremium}></div>
+          <div style={styles.headerGridF}>F</div>
+          <div style={styles.headerGridG}>G</div>
+          <div style={styles.headerRowNumber}></div>
+        </div>
+      ) : isBusinessClass ? (
         <div style={styles.businessSeatHeaderGrid}>
           <div style={styles.headerRowNumber}></div>
           <div style={styles.headerGridA}>A</div>
@@ -200,14 +311,21 @@ export default function SeatMap({
       {/* Seat Rows - Dynamic Grid Version */}
       <div style={styles.seatRows}>
         {seatMap.rows.map((row) => (
-          <div key={row.rowNumber} style={isBusinessClass ? styles.businessSeatRowGrid : styles.seatRowGrid}>
+          <div key={row.rowNumber} style={
+            isFirstClass ? styles.firstClassSeatRowGrid : 
+            isPremiumEconomy ? styles.premiumEconomySeatRowGrid :
+            isBusinessClass ? styles.businessSeatRowGrid : 
+            styles.seatRowGrid
+          }>
             {/* Row Number */}
             <div style={styles.rowNumberGrid}>{row.rowNumber}</div>
             
             {/* Seats in Grid Layout */}
             {row.seats.map((seat, seatIndex) => {
               if (seat.type === 'aisle') {
-                return <div key={seatIndex} style={styles.aisleGrid}></div>;
+                return <div key={seatIndex} style={
+                  isPremiumEconomy ? styles.aisleGridPremium : styles.aisleGrid
+                }></div>;
               }
               
               if (seat.type === 'aisle_wide') {
@@ -229,8 +347,12 @@ export default function SeatMap({
               if (cabinClass === 'Economy') {
                 const fareMultiplier = ECONOMY_FARE_TYPES[fareType.toUpperCase()]?.priceMultiplier || 1.0;
                 adjustedPrice = calculateSeatPrice(seat.type, cabinClass, fareMultiplier);
+              } else if (cabinClass === 'Premium Economy') {
+                adjustedPrice = calculateSeatPrice(seat.type, cabinClass, 1.0, null, null, premiumEconomyFareType);
               } else if (cabinClass === 'Business') {
                 adjustedPrice = calculateSeatPrice(seat.type, cabinClass, 1.0, businessFareType);
+              } else if (cabinClass === 'First') {
+                adjustedPrice = calculateSeatPrice(seat.type, cabinClass, 1.0, null, firstClassFareType);
               } else {
                 adjustedPrice = calculateSeatPrice(seat.type, cabinClass, 1.0);
               }
@@ -238,8 +360,42 @@ export default function SeatMap({
               // Determine if seat is included with Business fare
               const isIncludedWithFare = cabinClass === 'Business' && adjustedPrice === 0;
               
-              // Get seat styling based on type for Business Class
-              const seatStyle = isBusinessClass ? {
+              // Get seat styling based on cabin class
+              const seatStyle = isFirstClass ? {
+                ...styles.firstClassSeatGrid,
+                backgroundColor: seatColor,
+                cursor: isClickable ? 'pointer' : 'not-allowed',
+                opacity: disabled ? 0.6 : 1,
+                transform: selected ? 'scale(1.05)' : 'scale(1)',
+                boxShadow: selected 
+                  ? '0 6px 20px rgba(251, 191, 36, 0.4)' 
+                  : seat.status === 'available' 
+                    ? '0 4px 12px rgba(0, 0, 0, 0.15)' 
+                    : 'none',
+                // Special styling for First Class suite seats
+                border: seat.type === 'first_suite' 
+                  ? '3px solid #dc2626' 
+                  : '3px solid rgba(255, 215, 0, 0.8)',
+                justifySelf: 'center',
+                alignSelf: 'center',
+              } : isPremiumEconomy ? {
+                ...styles.premiumEconomySeatGrid,
+                backgroundColor: seatColor,
+                cursor: isClickable ? 'pointer' : 'not-allowed',
+                opacity: disabled ? 0.6 : 1,
+                transform: selected ? 'scale(1.05)' : 'scale(1)',
+                boxShadow: selected 
+                  ? '0 4px 12px rgba(139, 92, 246, 0.4)' 
+                  : seat.status === 'available' 
+                    ? '0 3px 8px rgba(0, 0, 0, 0.12)' 
+                    : 'none',
+                // Special styling for Premium Economy extra legroom seats
+                border: seat.type === 'premium_economy_extra_legroom' 
+                  ? '2px solid #8b5cf6' 
+                  : '2px solid rgba(139, 92, 246, 0.6)',
+                justifySelf: 'center',
+                alignSelf: 'center',
+              } : isBusinessClass ? {
                 ...styles.businessSeatGrid,
                 backgroundColor: seatColor,
                 cursor: isClickable ? 'pointer' : 'not-allowed',
@@ -311,6 +467,12 @@ export default function SeatMap({
                   {selected && (
                     <div style={styles.selectedIndicator}>
                       <span style={styles.checkmark}>✓</span>
+                    </div>
+                  )}
+                  {/* Premium seat indicator for Premium Economy */}
+                  {isPremiumEconomy && seat.type === 'premium_economy_extra_legroom' && (
+                    <div style={styles.premiumIndicator}>
+                      <span style={styles.premiumIcon}>🦵</span>
                     </div>
                   )}
                   {/* Premium seat indicator for Business Class */}
@@ -534,6 +696,26 @@ const styles = {
     padding: '0 1rem',
   },
   
+  // Premium Economy header grid (2-3-2 layout: A B | C D E | F G)
+  premiumEconomySeatHeaderGrid: {
+    display: 'grid',
+    gridTemplateColumns: '2rem 55px 55px 40px 55px 55px 55px 40px 55px 55px 2rem',
+    gap: '4px',
+    alignItems: 'center',
+    marginBottom: '1rem',
+    padding: '0 1rem',
+  },
+  
+  // First Class header grid (1-1 layout: A | F)
+  firstClassSeatHeaderGrid: {
+    display: 'grid',
+    gridTemplateColumns: '2rem 80px 160px 80px 2rem', // A | wide aisle | F
+    gap: '0px',
+    alignItems: 'center',
+    marginBottom: '1rem',
+    padding: '0 1rem',
+  },
+  
   seatRowGrid: {
     display: 'grid',
     gridTemplateColumns: '2rem 40px 40px 40px 20px 40px 40px 40px 2rem',
@@ -549,6 +731,26 @@ const styles = {
     gap: '0px',
     alignItems: 'center',
     minHeight: '70px', // Taller for business class
+  },
+  
+  // Premium Economy row grid (2-3-2 layout: A B | C D E | F G)
+  premiumEconomySeatRowGrid: {
+    display: 'grid',
+    gridTemplateColumns: '2rem 55px 55px 40px 55px 55px 55px 40px 55px 55px 2rem',
+    gap: '4px',
+    alignItems: 'center',
+    minHeight: '60px', // Increased height for better spacing
+    padding: '4px 0', // Added vertical padding
+  },
+  
+  // First Class row grid (1-1 layout: A | F with wide aisle)
+  firstClassSeatRowGrid: {
+    display: 'grid',
+    gridTemplateColumns: '2rem 80px 160px 80px 2rem', // A | wide aisle | F
+    gap: '0px',
+    alignItems: 'center',
+    minHeight: '90px', // Tallest for first class luxury
+    padding: '8px 0', // Extra padding for premium feel
   },
   
   headerGridA: {
@@ -660,6 +862,14 @@ const styles = {
     width: '40px',
   },
   
+  headerAislePremium: {
+    height: '30px',
+    width: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
   headerAisleWide: {
     height: '30px',
     width: '120px',
@@ -709,9 +919,55 @@ const styles = {
     margin: '0 auto', // Center horizontally in grid cell
   },
   
+  // Premium Economy seat styling - larger than Economy, smaller than Business
+  premiumEconomySeatGrid: {
+    width: '55px',
+    height: '55px',
+    borderRadius: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    transition: 'all 0.2s ease',
+    border: '2px solid rgba(139, 92, 246, 0.6)',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: 'white',
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+    margin: '2px auto', // Added margin for better spacing
+    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.12)',
+  },
+  
+  // First Class seat styling - larger and more luxurious
+  firstClassSeatGrid: {
+    width: '80px',
+    height: '80px',
+    borderRadius: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    transition: 'all 0.3s ease',
+    border: '3px solid rgba(255, 215, 0, 0.8)', // Gold border for luxury
+    fontSize: '1rem',
+    fontWeight: '700',
+    color: 'white',
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.4)',
+    margin: '0 auto',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+  },
+  
   aisleGrid: {
     width: '20px',
     height: '40px',
+  },
+  
+  aisleGridPremium: {
+    width: '40px',
+    height: '55px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   
   aisleWideGrid: {
@@ -729,7 +985,7 @@ const styles = {
   seatRows: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '6px',
+    gap: '8px', // Increased gap for better spacing
     maxHeight: '500px',
     overflowY: 'auto',
     padding: '0 1rem',

@@ -8,6 +8,7 @@ export default function PassengerSeatSummary({
   selectedSeats, 
   cabinClass, 
   fareType = 'base',
+  premiumEconomyFareType = 'standard',
   businessFareType = 'flex',
   totalPrice 
 }) {
@@ -49,8 +50,20 @@ export default function PassengerSeatSummary({
         {passengers.map((passenger, index) => {
           const seat = getPassengerSeat(passenger);
           const hasSelectedSeat = !!seat;
-          const fareMultiplier = ECONOMY_FARE_TYPES[fareType.toUpperCase()]?.priceMultiplier || 1.0;
-          const seatPrice = seat ? calculateSeatPrice(seat.type, cabinClass, fareMultiplier) : 0;
+          let seatPrice = 0;
+          
+          if (seat) {
+            if (cabinClass === 'Economy') {
+              const fareMultiplier = ECONOMY_FARE_TYPES[fareType.toUpperCase()]?.priceMultiplier || 1.0;
+              seatPrice = calculateSeatPrice(seat.type, cabinClass, fareMultiplier);
+            } else if (cabinClass === 'Premium Economy') {
+              seatPrice = calculateSeatPrice(seat.type, cabinClass, 1.0, null, null, premiumEconomyFareType);
+            } else if (cabinClass === 'Business') {
+              seatPrice = calculateSeatPrice(seat.type, cabinClass, 1.0, businessFareType);
+            } else {
+              seatPrice = calculateSeatPrice(seat.type, cabinClass, 1.0);
+            }
+          }
 
           return (
             <div 
@@ -116,6 +129,8 @@ export default function PassengerSeatSummary({
             if (cabinClass === 'Economy') {
               const fareMultiplier = ECONOMY_FARE_TYPES[fareType.toUpperCase()]?.priceMultiplier || 1.0;
               price = calculateSeatPrice(seat.type, cabinClass, fareMultiplier);
+            } else if (cabinClass === 'Premium Economy') {
+              price = calculateSeatPrice(seat.type, cabinClass, 1.0, null, null, premiumEconomyFareType);
             } else if (cabinClass === 'Business') {
               price = calculateSeatPrice(seat.type, cabinClass, 1.0, businessFareType);
             } else {
@@ -129,7 +144,7 @@ export default function PassengerSeatSummary({
                 </span>
                 <span style={styles.priceValue}>
                   {price > 0 ? `+${formatPrice(price, CURRENCY_CONFIG)}` : 
-                   cabinClass === 'Business' ? 'Included' : 'Free'}
+                   (cabinClass === 'Business' || cabinClass === 'First') ? 'Included' : 'Free'}
                 </span>
               </div>
             );
@@ -179,9 +194,9 @@ export default function PassengerSeatSummary({
           <span style={styles.cabinIcon}>✈️</span>
           <span style={styles.cabinText}>{cabinClass} Class</span>
         </div>
-        {cabinClass !== 'Economy' && (
+        {cabinClass === 'Economy' || cabinClass === 'Premium Economy' ? null : (
           <p style={styles.cabinNote}>
-            Interactive seat selection available for Economy Class only
+            Interactive seat selection available for Economy and Premium Economy only
           </p>
         )}
       </div>

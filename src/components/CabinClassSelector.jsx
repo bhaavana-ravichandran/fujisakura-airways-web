@@ -3,7 +3,7 @@
 export default function CabinClassSelector({ 
   selectedClass, 
   onClassChange, 
-  availableClasses = ['Economy', 'Business', 'First'] 
+  availableClasses = ['Economy', 'Premium Economy', 'Business', 'First'] 
 }) {
   const classInfo = {
     Economy: {
@@ -11,6 +11,12 @@ export default function CabinClassSelector({
       description: 'Comfortable seating with essential amenities',
       features: ['Standard legroom', 'Complimentary snacks', 'Entertainment system'],
       available: true
+    },
+    'Premium Economy': {
+      icon: '✈️',
+      description: 'Enhanced economy with extra comfort and services',
+      features: ['Extra legroom', 'Premium meals', 'Priority check-in'],
+      available: true // Now fully available
     },
     Business: {
       icon: '💼',
@@ -20,9 +26,9 @@ export default function CabinClassSelector({
     },
     First: {
       icon: '👑',
-      description: 'Luxury travel experience with exclusive amenities',
-      features: ['Lie-flat seats', 'Gourmet dining', 'Personal service'],
-      available: false
+      description: 'Ultimate luxury travel with private suite experience',
+      features: ['Private suites', 'À la carte dining', 'Personal concierge'],
+      available: true
     }
   };
 
@@ -88,8 +94,12 @@ export default function CabinClassSelector({
           <p style={styles.infoText}>
             {selectedClass === 'Economy' 
               ? 'Economy Class seat selection is fully interactive. Choose your preferred seats below.'
+              : selectedClass === 'Premium Economy'
+              ? 'Premium Economy seat selection is fully interactive. Choose your preferred fare type and enhanced seats below.'
               : selectedClass === 'Business'
               ? 'Business Class seat selection is fully interactive. Choose your preferred seats and fare type below.'
+              : selectedClass === 'First'
+              ? 'First Class seat selection is fully interactive. Choose your preferred fare type and luxury seats below.'
               : `${selectedClass} Class seat selection is coming soon. Currently showing preview layout only.`
             }
           </p>

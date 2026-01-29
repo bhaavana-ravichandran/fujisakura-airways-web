@@ -8,9 +8,10 @@ import SeatMap from '../../components/SeatMap';
 import PassengerSeatSummary from '../../components/PassengerSeatSummary';
 import CabinClassSelector from '../../components/CabinClassSelector';
 import EconomyFareSelector from '../../components/EconomyFareSelector';
+import PremiumEconomyFareSelector from '../../components/PremiumEconomyFareSelector';
 import BusinessFareSelector from '../../components/BusinessFareSelector';
-import BackButton from '../../components/BackButton';
-import { generateSeatMap, calculateSeatPrice, ECONOMY_FARE_TYPES, BUSINESS_FARE_TYPES } from '../../utils/seatUtils';
+import FirstClassFareSelector from '../../components/FirstClassFareSelector';
+import { generateSeatMap, calculateSeatPrice, ECONOMY_FARE_TYPES, PREMIUM_ECONOMY_FARE_TYPES, BUSINESS_FARE_TYPES, FIRST_CLASS_FARE_TYPES } from '../../utils/seatUtils';
 import { formatPrice, CURRENCY_CONFIG } from '../../utils/currency';
 
 export default function SeatSelectionPage() {
@@ -19,7 +20,9 @@ export default function SeatSelectionPage() {
   const [passengerDetails, setPassengerDetails] = useState([]);
   const [selectedCabinClass, setSelectedCabinClass] = useState('Economy');
   const [selectedFareType, setSelectedFareType] = useState('base'); // Default to Economy Base
+  const [selectedPremiumEconomyFareType, setSelectedPremiumEconomyFareType] = useState('standard'); // Default to Premium Economy Standard
   const [selectedBusinessFareType, setSelectedBusinessFareType] = useState('flex'); // Default to Business Flex
+  const [selectedFirstClassFareType, setSelectedFirstClassFareType] = useState('standard'); // Default to First Class Standard
   const [selectedSeats, setSelectedSeats] = useState({});
   const [currentPassengerIndex, setCurrentPassengerIndex] = useState(0);
   const [seatMap, setSeatMap] = useState(null);
@@ -76,19 +79,27 @@ export default function SeatSelectionPage() {
       total = Object.values(selectedSeats).reduce((sum, seat) => {
         return sum + calculateSeatPrice(seat.type, selectedCabinClass, fareMultiplier);
       }, 0);
+    } else if (selectedCabinClass === 'Premium Economy') {
+      total = Object.values(selectedSeats).reduce((sum, seat) => {
+        return sum + calculateSeatPrice(seat.type, selectedCabinClass, 1.0, null, null, selectedPremiumEconomyFareType);
+      }, 0);
     } else if (selectedCabinClass === 'Business') {
       total = Object.values(selectedSeats).reduce((sum, seat) => {
         return sum + calculateSeatPrice(seat.type, selectedCabinClass, 1.0, selectedBusinessFareType);
       }, 0);
+    } else if (selectedCabinClass === 'First') {
+      total = Object.values(selectedSeats).reduce((sum, seat) => {
+        return sum + calculateSeatPrice(seat.type, selectedCabinClass, 1.0, null, selectedFirstClassFareType);
+      }, 0);
     } else {
-      // First Class or other classes
+      // Other classes
       total = Object.values(selectedSeats).reduce((sum, seat) => {
         return sum + calculateSeatPrice(seat.type, selectedCabinClass, 1.0);
       }, 0);
     }
     
     setTotalSeatPrice(total);
-  }, [selectedSeats, selectedCabinClass, selectedFareType, selectedBusinessFareType]);
+  }, [selectedSeats, selectedCabinClass, selectedFareType, selectedPremiumEconomyFareType, selectedBusinessFareType, selectedFirstClassFareType]);
 
   const handleSeatSelect = (seatId, seatData) => {
     const currentPassenger = passengerDetails[currentPassengerIndex];
@@ -123,6 +134,8 @@ export default function SeatSelectionPage() {
         seatPrice = calculateSeatPrice(seatData.type, selectedCabinClass, fareMultiplier);
       } else if (selectedCabinClass === 'Business') {
         seatPrice = calculateSeatPrice(seatData.type, selectedCabinClass, 1.0, selectedBusinessFareType);
+      } else if (selectedCabinClass === 'First') {
+        seatPrice = calculateSeatPrice(seatData.type, selectedCabinClass, 1.0, null, selectedFirstClassFareType);
       } else {
         seatPrice = calculateSeatPrice(seatData.type, selectedCabinClass, 1.0);
       }
@@ -214,8 +227,18 @@ export default function SeatSelectionPage() {
     // Recalculate prices for existing seat selections will happen automatically via useEffect
   };
 
+  const handlePremiumEconomyFareTypeChange = (fareType) => {
+    setSelectedPremiumEconomyFareType(fareType);
+    // Recalculate prices for existing seat selections will happen automatically via useEffect
+  };
+
   const handleBusinessFareTypeChange = (fareType) => {
     setSelectedBusinessFareType(fareType);
+    // Recalculate prices for existing seat selections will happen automatically via useEffect
+  };
+
+  const handleFirstClassFareTypeChange = (fareType) => {
+    setSelectedFirstClassFareType(fareType);
     // Recalculate prices for existing seat selections will happen automatically via useEffect
   };
 
@@ -238,6 +261,19 @@ export default function SeatSelectionPage() {
           price: calculateSeatPrice(seat.type, selectedCabinClass, fareMultiplier)
         }))
       };
+    } else if (selectedCabinClass === 'Premium Economy') {
+      seatSelectionData = {
+        selectedSeats,
+        cabinClass: selectedCabinClass,
+        premiumEconomyFareType: selectedPremiumEconomyFareType,
+        totalSeatPrice,
+        seatSummary: Object.entries(selectedSeats).map(([passengerKey, seat]) => ({
+          passenger: passengerKey.replace('_', ' '),
+          seat: seat.id,
+          type: seat.type,
+          price: calculateSeatPrice(seat.type, selectedCabinClass, 1.0, null, null, selectedPremiumEconomyFareType)
+        }))
+      };
     } else if (selectedCabinClass === 'Business') {
       seatSelectionData = {
         selectedSeats,
@@ -251,8 +287,21 @@ export default function SeatSelectionPage() {
           price: calculateSeatPrice(seat.type, selectedCabinClass, 1.0, selectedBusinessFareType)
         }))
       };
+    } else if (selectedCabinClass === 'First') {
+      seatSelectionData = {
+        selectedSeats,
+        cabinClass: selectedCabinClass,
+        firstClassFareType: selectedFirstClassFareType,
+        totalSeatPrice,
+        seatSummary: Object.entries(selectedSeats).map(([passengerKey, seat]) => ({
+          passenger: passengerKey.replace('_', ' '),
+          seat: seat.id,
+          type: seat.type,
+          price: calculateSeatPrice(seat.type, selectedCabinClass, 1.0, null, selectedFirstClassFareType)
+        }))
+      };
     } else {
-      // First Class or other
+      // Other classes
       seatSelectionData = {
         selectedSeats,
         cabinClass: selectedCabinClass,
@@ -267,13 +316,13 @@ export default function SeatSelectionPage() {
     }
     
     localStorage.setItem('seatSelection', JSON.stringify(seatSelectionData));
-    router.push('/payment');
+    router.push('/baggage-selection');
   };
 
   const handleSkipSeatSelection = () => {
     // Clear any seat selection data and continue
     localStorage.removeItem('seatSelection');
-    router.push('/payment');
+    router.push('/baggage-selection');
   };
 
   if (!isLoaded || !seatMap) {
@@ -306,11 +355,6 @@ export default function SeatSelectionPage() {
             </p>
           </div>
 
-          {/* Back Button */}
-          <div style={styles.backButtonContainer}>
-            <BackButton customPath="/passenger-details" label="Back to Passenger Details" />
-          </div>
-
           <div style={styles.selectionContainer}>
             {/* Left Panel - Seat Map */}
             <div style={styles.leftPanel}>
@@ -318,7 +362,7 @@ export default function SeatSelectionPage() {
               <CabinClassSelector
                 selectedClass={selectedCabinClass}
                 onClassChange={setSelectedCabinClass}
-                availableClasses={['Economy', 'Business', 'First']}
+                availableClasses={['Economy', 'Premium Economy', 'Business', 'First']}
               />
 
               {/* Economy Fare Type Selector - Only show for Economy class */}
@@ -329,11 +373,27 @@ export default function SeatSelectionPage() {
                 />
               )}
 
+              {/* Premium Economy Fare Type Selector - Only show for Premium Economy class */}
+              {selectedCabinClass === 'Premium Economy' && (
+                <PremiumEconomyFareSelector
+                  selectedFareType={selectedPremiumEconomyFareType}
+                  onFareTypeChange={handlePremiumEconomyFareTypeChange}
+                />
+              )}
+
               {/* Business Fare Type Selector - Only show for Business class */}
               {selectedCabinClass === 'Business' && (
                 <BusinessFareSelector
                   selectedFareType={selectedBusinessFareType}
                   onFareTypeChange={handleBusinessFareTypeChange}
+                />
+              )}
+
+              {/* First Class Fare Type Selector - Only show for First class */}
+              {selectedCabinClass === 'First' && (
+                <FirstClassFareSelector
+                  selectedFareType={selectedFirstClassFareType}
+                  onFareTypeChange={handleFirstClassFareTypeChange}
                 />
               )}
 
@@ -378,7 +438,9 @@ export default function SeatSelectionPage() {
                   onSeatSelect={handleSeatSelect}
                   cabinClass={selectedCabinClass}
                   fareType={selectedFareType}
+                  premiumEconomyFareType={selectedPremiumEconomyFareType}
                   businessFareType={selectedBusinessFareType}
+                  firstClassFareType={selectedFirstClassFareType}
                   disabled={false}
                 />
               </div>
@@ -428,9 +490,20 @@ export default function SeatSelectionPage() {
                 selectedSeats={selectedSeats}
                 cabinClass={selectedCabinClass}
                 fareType={selectedFareType}
+                premiumEconomyFareType={selectedPremiumEconomyFareType}
                 businessFareType={selectedBusinessFareType}
                 totalPrice={totalSeatPrice}
               />
+
+              {/* Back Button */}
+              <div style={styles.backButtonRow}>
+                <button
+                  onClick={() => router.push('/passenger-details')}
+                  style={styles.backButton}
+                >
+                  ← Back to Passenger Details
+                </button>
+              </div>
 
               {/* Action Buttons */}
               <div style={styles.actionButtons}>
@@ -447,7 +520,7 @@ export default function SeatSelectionPage() {
                     ...styles.continueButton,
                   }}
                 >
-                  Continue to Payment
+                  Continue to Baggage Selection
                   {totalSeatPrice > 0 && (
                     <span style={styles.buttonPrice}>
                       (+{formatPrice(totalSeatPrice, CURRENCY_CONFIG)})
@@ -455,19 +528,6 @@ export default function SeatSelectionPage() {
                   )}
                 </button>
               </div>
-
-              {/* Future Classes Notice - Only show for First Class */}
-              {selectedCabinClass === 'First' && (
-                <div style={styles.futureNotice}>
-                  <div style={styles.noticeIcon}>🚧</div>
-                  <div>
-                    <p style={styles.noticeTitle}>Coming Soon</p>
-                    <p style={styles.noticeText}>
-                      {selectedCabinClass} Class seat selection will be available in a future update.
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -516,12 +576,6 @@ const styles = {
     color: '#4a5568',
     maxWidth: '600px',
     margin: '0 auto',
-  },
-  
-  backButtonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '2rem',
   },
   
   selectionContainer: {
@@ -633,6 +687,26 @@ const styles = {
     padding: '2rem',
     boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
+  },
+  
+  backButtonRow: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    marginTop: '1.5rem',
+    marginBottom: '1rem',
+  },
+  
+  backButton: {
+    background: 'linear-gradient(135deg, #6c757d, #495057)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '12px 24px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(108, 117, 125, 0.3)',
   },
   
   actionButtons: {

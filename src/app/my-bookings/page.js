@@ -102,11 +102,6 @@ export default function MyBookingsPage() {
         <div style={styles.contentWrapper}>
           <h1 style={styles.pageTitle}>My Bookings</h1>
 
-          {/* Back Button */}
-          <div style={styles.backButtonContainer}>
-            <BackButton customPath="/home" label="Back to Home" />
-          </div>
-
           <div style={styles.filterContainer}>
             {['All', 'Upcoming', 'Completed', 'Cancelled'].map((filter) => (
               <Button

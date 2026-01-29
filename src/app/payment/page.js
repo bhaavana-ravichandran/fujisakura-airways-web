@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import BackButton from '../../components/BackButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,11 +41,15 @@ export default function PaymentPage() {
 
   // Seat selection state
   const [seatSelection, setSeatSelection] = useState(null);
+  
+  // Baggage selection state
+  const [baggageSelection, setBaggageSelection] = useState(null);
 
   useEffect(() => {
     const flightData = localStorage.getItem('selectedFlight');
     const passengerData = localStorage.getItem('passengerDetails');
     const seatData = localStorage.getItem('seatSelection');
+    const baggageData = localStorage.getItem('baggageSelection');
     
     if (!flightData || !passengerData) {
       router.push('/home');
@@ -60,6 +63,11 @@ export default function PaymentPage() {
       // Load seat selection data if available
       if (seatData) {
         setSeatSelection(JSON.parse(seatData));
+      }
+      
+      // Load baggage selection data if available
+      if (baggageData) {
+        setBaggageSelection(JSON.parse(baggageData));
       }
       
       setIsLoaded(true);
@@ -133,7 +141,10 @@ export default function PaymentPage() {
     // Add seat selection charges if available
     const seatCharges = seatSelection ? seatSelection.totalSeatPrice : 0;
     
-    return flightTotal + seatCharges;
+    // Add baggage selection charges if available
+    const baggageCharges = baggageSelection ? baggageSelection.totalBaggagePrice : 0;
+    
+    return flightTotal + seatCharges + baggageCharges;
   };
 
   const getFormattedPrice = (amount) => {
@@ -166,14 +177,22 @@ export default function PaymentPage() {
     
     // Add seat selection charges
     const seatCharges = seatSelection ? seatSelection.totalSeatPrice : 0;
+    
+    // Add baggage selection charges
+    const baggageCharges = baggageSelection ? baggageSelection.totalBaggagePrice : 0;
+    
     const currency = getCurrencyFromData(selectedFlight);
-    const grandTotal = flightPricing.total.amount + seatCharges;
+    const grandTotal = flightPricing.total.amount + seatCharges + baggageCharges;
     
     return {
       flight: flightPricing,
       seatCharges: {
         amount: seatCharges,
         formatted: formatPrice(seatCharges, currency)
+      },
+      baggageCharges: {
+        amount: baggageCharges,
+        formatted: formatPrice(baggageCharges, currency)
       },
       grandTotal: {
         amount: grandTotal,
@@ -219,11 +238,6 @@ export default function PaymentPage() {
       <main style={styles.main}>
         <div style={styles.contentWrapper}>
           <h1 style={styles.pageTitle}>Complete Your Payment</h1>
-          
-          {/* Back Button */}
-          <div style={styles.backButtonContainer}>
-            <BackButton customPath="/seat-selection" label="Back to Seat Selection" />
-          </div>
           
           <div style={styles.paymentContainer}>
             {/* Payment Summary */}
@@ -363,6 +377,65 @@ export default function PaymentPage() {
                     </div>
                   )}
                   
+                  {/* Baggage Selection Section */}
+                  {baggageSelection && (
+                    <div style={styles.baggageSelectionSection}>
+                      <div style={styles.baggageHeader}>
+                        <span style={styles.baggageTitle}>Baggage Selection</span>
+                        <span style={styles.baggageIcon}>🧳</span>
+                      </div>
+                      
+                      <div style={styles.baggageDetails}>
+                        <div style={styles.baggageInfo}>
+                          <span style={styles.baggageLabel}>Included Baggage:</span>
+                          <span style={styles.baggageValue}>
+                            {baggageSelection.includedBaggage?.cabin} cabin + {baggageSelection.includedBaggage?.checkin} check-in
+                          </span>
+                        </div>
+                        
+                        {baggageSelection.baggageSummary?.extraBaggage && 
+                         baggageSelection.baggageSummary.extraBaggage.some(item => item.price > 0) && (
+                          <div style={styles.extraBaggageList}>
+                            <span style={styles.baggageSubtitle}>Extra Baggage:</span>
+                            {baggageSelection.baggageSummary.extraBaggage
+                              .filter(item => item.price > 0)
+                              .map((item, index) => (
+                                <div key={index} style={styles.baggageItem}>
+                                  <span style={styles.baggagePassenger}>{item.passenger}</span>
+                                  <span style={styles.baggageOption}>{item.option}</span>
+                                  <span style={styles.baggagePrice}>
+                                    {getFormattedPrice(item.price)}
+                                  </span>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                        
+                        {baggageSelection.baggageSummary?.specialBaggage && 
+                         baggageSelection.baggageSummary.specialBaggage.some(passenger => passenger.items.length > 0) && (
+                          <div style={styles.specialBaggageList}>
+                            <span style={styles.baggageSubtitle}>Special Baggage:</span>
+                            {baggageSelection.baggageSummary.specialBaggage
+                              .filter(passenger => passenger.items.length > 0)
+                              .map((passenger, index) => (
+                                <div key={index}>
+                                  {passenger.items.map((item, itemIndex) => (
+                                    <div key={itemIndex} style={styles.baggageItem}>
+                                      <span style={styles.baggagePassenger}>{passenger.passenger}</span>
+                                      <span style={styles.baggageOption}>{item.name}</span>
+                                      <span style={styles.baggagePrice}>
+                                        {item.price > 0 ? getFormattedPrice(item.price) : 'Free'}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Enhanced Price Breakdown */}
                   <div style={styles.priceBreakdown}>
                     <div style={styles.priceHeader}>
@@ -383,6 +456,12 @@ export default function PaymentPage() {
                         <div style={styles.priceRow}>
                           <span style={styles.priceLabel}>Seat Selection Charges</span>
                           <span style={styles.priceValue}>{getPriceBreakdown().seatCharges.formatted}</span>
+                        </div>
+                      )}
+                      {baggageSelection && baggageSelection.totalBaggagePrice > 0 && (
+                        <div style={styles.priceRow}>
+                          <span style={styles.priceLabel}>Baggage Charges</span>
+                          <span style={styles.priceValue}>{getPriceBreakdown().baggageCharges.formatted}</span>
                         </div>
                       )}
                       <div style={styles.serviceFeeRow}>
@@ -652,6 +731,16 @@ export default function PaymentPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Back Button */}
+              <div style={styles.backButtonRow}>
+                <button
+                  onClick={() => router.push('/baggage-selection')}
+                  style={styles.backButton}
+                >
+                  ← Back to Baggage Selection
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -707,10 +796,24 @@ const styles = {
     textAlign: 'center',
   },
   
-  backButtonContainer: {
+  backButtonRow: {
     display: 'flex',
     justifyContent: 'center',
-    marginBottom: '2rem',
+    marginTop: '2rem',
+    marginBottom: '1rem',
+  },
+  
+  backButton: {
+    background: 'linear-gradient(135deg, #6c757d, #495057)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '12px 24px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(108, 117, 125, 0.3)',
   },
   
   loadingContainer: {
@@ -1031,6 +1134,108 @@ const styles = {
   
   seatPrice: {
     fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#059669',
+  },
+  
+  // Baggage Selection Styles
+  baggageSelectionSection: {
+    background: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+    color: '#2d3748',
+  },
+  
+  baggageHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1rem',
+  },
+  
+  baggageTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '700',
+    color: '#2d3748',
+  },
+  
+  baggageIcon: {
+    fontSize: '1.5rem',
+    opacity: 0.8,
+  },
+  
+  baggageDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+  },
+  
+  baggageInfo: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: '8px',
+    padding: '1rem',
+  },
+  
+  baggageLabel: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  
+  baggageValue: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#2d3748',
+  },
+  
+  baggageSubtitle: {
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '0.5rem',
+    display: 'block',
+  },
+  
+  extraBaggageList: {
+    background: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: '8px',
+    padding: '1rem',
+  },
+  
+  specialBaggageList: {
+    background: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: '8px',
+    padding: '1rem',
+  },
+  
+  baggageItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.5rem 0',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
+  },
+  
+  baggagePassenger: {
+    fontSize: '0.85rem',
+    fontWeight: '500',
+    color: '#374151',
+    flex: 1,
+  },
+  
+  baggageOption: {
+    fontSize: '0.85rem',
+    fontWeight: '500',
+    color: '#2d3748',
+    marginRight: '0.5rem',
+  },
+  
+  baggagePrice: {
+    fontSize: '0.85rem',
     fontWeight: '600',
     color: '#059669',
   },

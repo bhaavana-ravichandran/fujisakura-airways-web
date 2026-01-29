@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import BackButton from '../../components/BackButton';
 import { formatPrice, getCurrencyFromData } from '../../utils/currency';
 
 export default function BookingConfirmationPage() {
@@ -154,11 +153,6 @@ export default function BookingConfirmationPage() {
             <p style={styles.subtitle}>Your flight has been successfully booked</p>
           </div>
 
-          {/* Back Button */}
-          <div style={styles.backButtonContainer}>
-            <BackButton customPath="/home" label="Back to Home" />
-          </div>
-
           {/* Booking Identifiers */}
           <div style={styles.identifiersSection}>
             <div style={styles.identifierCard}>
@@ -239,6 +233,12 @@ export default function BookingConfirmationPage() {
 
           {/* Action Buttons */}
           <div style={styles.buttonContainer}>
+            <button
+              onClick={() => router.push('/home')}
+              style={styles.backButton}
+            >
+              ← Back to Home
+            </button>
             <button
               onClick={handleViewBookings}
               style={styles.primaryButton}
@@ -328,12 +328,6 @@ const styles = {
   subtitle: {
     fontSize: '1.1rem',
     color: '#6c757d'
-  },
-  
-  backButtonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '2rem',
   },
   
   identifiersSection: {
@@ -502,5 +496,20 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
+  },
+  
+  backButton: {
+    flex: 1,
+    minWidth: '200px',
+    background: 'linear-gradient(135deg, #6c757d, #495057)',
+    color: 'white',
+    border: 'none',
+    padding: '14px 28px',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(108, 117, 125, 0.3)'
   }
 };

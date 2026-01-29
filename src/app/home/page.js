@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import BackButton from '../../components/BackButton';
 import { handleAlphabetsOnly } from '../../utils/inputValidation';
 
 export default function HomePage() {
@@ -562,6 +561,7 @@ export default function HomePage() {
                 style={styles.select}
               >
                 <option value="economy">Economy</option>
+                <option value="premium-economy">Premium Economy</option>
                 <option value="business">Business</option>
                 <option value="first">First Class</option>
               </select>
@@ -613,10 +613,7 @@ export default function HomePage() {
       </Card>
       </div>
 
-      {/* Back Button */}
-      <div style={styles.backButtonContainer}>
-        <BackButton customPath="/" label="Back to Landing" />
-      </div>
+
 
       {/* Footer */}
       <div className="relative z-20">
@@ -645,14 +642,6 @@ const styles = {
     paddingBottom: '80px', // Account for footer
     position: 'relative',
     overflow: 'hidden'
-  },
-  
-  backButtonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    padding: '2rem',
-    background: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(10px)',
   },
   
   planesContainer: {

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import BackButton from '../../components/BackButton';
 import { handleAlphabetsOnly, handleDigitsOnly, handlePhoneInput, isValidEmail, isValidAge } from '../../utils/inputValidation';
 import { formatPrice, getCurrencyFromData } from '../../utils/currency';
 
@@ -205,10 +204,7 @@ export default function PassengerDetailsPage() {
           </div>
         </div>
 
-        {/* Back Button */}
-        <div style={styles.backButtonContainer}>
-          <BackButton customPath="/flights" label="Back to Flights" />
-        </div>
+
 
         {/* Passenger Details Form */}
         <div style={styles.formContainer}>
@@ -474,12 +470,6 @@ const styles = {
     fontSize: '1.2rem',
     fontWeight: '700',
     color: '#28a745'
-  },
-  
-  backButtonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '2rem',
   },
   
   formContainer: {

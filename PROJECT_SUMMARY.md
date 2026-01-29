@@ -100,8 +100,8 @@ fujisakura-airways-web/
 
 ### **🔄 CURRENT STATUS**
 **Active Development:** My Bookings page (next priority)
-**Last Updated:** January 14, 2025
-**Current Flow:** Landing → Auth → Home → Flights → Passenger Details → Payment → Booking Confirmation
+**Last Updated:** January 28, 2026
+**Current Flow:** Landing → Auth → Home → Flights → Passenger Details → Seat Selection → Baggage Selection → Payment → Booking Confirmation
 
 ## 🛠️ **Technology Stack**
 
@@ -338,9 +338,97 @@ npm start
 
 ---
 
-## 📝 **Recent Updates (January 14, 2025)**
+## 📝 **Recent Updates (January 28, 2026)**
 
-### **✅ Completed Today**
+### **✅ Completed Today - Baggage Selection Implementation**
+1. **Dedicated Baggage Selection Page**
+   - Created comprehensive baggage selection page (`src/app/baggage-selection/page.js`)
+   - Integrated into booking flow between seat selection and payment
+   - Three main sections: Included Baggage, Extra Baggage, Special Baggage
+   - Professional airline-standard UI with mock data and pricing
+
+2. **Section 1: Included Baggage (Read-only)**
+   - Displays included baggage based on cabin class and fare type
+   - Shows cabin baggage and check-in baggage allowances
+   - "Included as per selected fare" badge for confirmation
+   - Non-editable information section as specified
+
+3. **Section 2: Extra Baggage Selection**
+   - Per-passenger extra baggage options: +5kg, +10kg, +15kg, +20kg
+   - Radio button selection with mock pricing (₹1,500 - ₹5,200)
+   - "Most Popular" badge for +10kg option
+   - Dynamic price calculation and summary
+   - Clear labeling: "Extra baggage for personal items or additional luggage"
+
+4. **Section 3: Special Baggage Options**
+   - Sports equipment, musical instruments, medical equipment, fragile items
+   - Each option shows description, handling rules, and pricing
+   - Per-passenger toggle selection for special items
+   - Medical equipment marked as "Free with documentation"
+   - Fragile items marked as "Approval required"
+   - Cargo services informational note as specified
+
+5. **Enhanced Booking Flow Integration**
+   - Updated seat selection page to navigate to baggage selection
+   - Enhanced payment page to display baggage selection summary
+   - Complete data persistence through localStorage
+   - Updated price calculations to include baggage charges
+   - Proper back navigation between all pages
+
+6. **Payment Page Enhancements**
+   - Added baggage selection summary section with gradient styling
+   - Displays included baggage, extra baggage, and special baggage
+   - Updated price breakdown to include baggage charges
+   - Enhanced total price calculation with all components
+   - Updated back button to navigate to baggage selection
+
+### **✅ Previously Completed (January 28, 2026) - Premium Economy Implementation**
+1. **Premium Economy Cabin Class**
+   - Added Premium Economy as selectable option between Economy and Business
+   - Created comprehensive fare type system with 3 options:
+     - **Premium Economy Lite:** Entry-level with 30kg baggage, limited flexibility
+     - **Premium Economy Standard:** Recommended option with 35kg baggage, balanced benefits
+     - **Premium Economy Flex:** Maximum flexibility with 35kg baggage, free modifications
+   - Implemented 2-3-2 seat layout (A B | C D E | F G) for Premium Economy
+   - Added Premium Economy specific seat types and pricing
+
+2. **Seat Selection Enhancement**
+   - Added PremiumEconomyFareSelector component with baggage allowance display
+   - Updated SeatMap component with Premium Economy header grid and styling
+   - Implemented Premium Economy seat pricing calculations
+   - Added Premium Economy support to PassengerSeatSummary component
+   - Created Premium Economy specific seat indicators (extra legroom seats)
+   - Updated cabin class selector to include Premium Economy option
+
+3. **Technical Implementation**
+   - Enhanced `seatUtils.js` with Premium Economy fare types and configurations
+   - Updated seat pricing calculations to support Premium Economy fare multipliers
+   - Added Premium Economy seat map generation with 2-3-2 layout
+   - Implemented Premium Economy specific styling (50px seats, purple accents)
+   - Updated all seat selection components to handle Premium Economy data flow
+
+4. **User Experience Improvements**
+   - Premium Economy seats are larger than Economy but smaller than Business
+   - Special styling for extra legroom seats with leg icon indicator
+   - Fare type recommendations with "Recommended" badge for Standard option
+   - Baggage allowance clearly displayed in fare selector
+   - Smooth integration with existing booking flow
+
+### **✅ Previously Completed (January 27, 2026)**
+1. **UI/UX Navigation Cleanup**
+   - Removed redundant "Back to Landing" button from Home page (users navigate via header tabs)
+   - Removed duplicate "Back to Search" button from Flights page (kept inline button in header)
+   - Removed duplicate "Back to Flights" button from Passenger Details page (kept inline button in form)
+   - Cleaned up unused BackButton imports and CSS styles
+   - Improved navigation flow consistency across all pages
+
+2. **Code Optimization**
+   - Removed unused BackButton component imports from multiple pages
+   - Cleaned up unused CSS styles (backButtonContainer) from affected pages
+   - Maintained existing functionality while eliminating redundancy
+   - Improved page loading performance by removing unnecessary components
+
+### **✅ Previously Completed (January 14, 2025)**
 1. **Advanced Travellers Selector**
    - Replaced simple dropdown with interactive popover
    - Separate Adults & Children counters with +/- buttons
@@ -382,5 +470,21 @@ npm start
 ---
 
 **🚀 Ready for Next Phase:** My Bookings & Cancellation System
-**📅 Last Updated:** January 14, 2025
+**📅 Last Updated:** January 28, 2026
 **👨‍💻 Development Status:** Active & On Track
+
+### **🎯 Baggage Selection Implementation Complete**
+- ✅ Dedicated baggage selection page with 3 comprehensive sections
+- ✅ Included baggage display based on cabin class and fare type
+- ✅ Per-passenger extra baggage selection with mock pricing
+- ✅ Special baggage options with handling rules and approval requirements
+- ✅ Complete booking flow integration: Seat Selection → Baggage Selection → Payment
+- ✅ Enhanced payment page with baggage summary and pricing
+- ✅ Professional airline-standard UI with proper data persistence
+
+### **🎯 Premium Economy Implementation Complete**
+- ✅ Full Premium Economy cabin class with 3 fare types
+- ✅ 2-3-2 seat layout with proper spacing and styling
+- ✅ Integrated pricing calculations and baggage allowances
+- ✅ Complete UI/UX integration across all seat selection components
+- ✅ Ready for production use with mock data
