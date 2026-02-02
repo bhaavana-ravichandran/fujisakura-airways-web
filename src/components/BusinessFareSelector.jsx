@@ -2,6 +2,28 @@
 
 import { BUSINESS_FARE_TYPES } from '../utils/seatUtils';
 
+// Fare benefits for each Business fare type
+const FARE_BENEFITS = {
+  flex: {
+    cancellation: { status: 'free', label: '✅ Free before departure' },
+    dateChange: { status: 'free', label: '✅ Free' },
+    seatChoice: { status: 'included', label: '✅ Included' },
+    meals: { status: 'premium', label: '⭐ Gourmet complimentary' }
+  },
+  premium: {
+    cancellation: { status: 'free', label: '✅ Free anytime' },
+    dateChange: { status: 'free', label: '✅ Free' },
+    seatChoice: { status: 'premium', label: '⭐ Included with extra privacy seats' },
+    meals: { status: 'premium', label: '⭐ Gourmet + Pre-order' }
+  },
+  suite: {
+    cancellation: { status: 'refundable', label: '✅ Fully refundable' },
+    dateChange: { status: 'unlimited', label: '✅ Unlimited changes' },
+    seatChoice: { status: 'suite', label: '⭐ Private suite included' },
+    meals: { status: 'luxury', label: '⭐ Chef-curated luxury dining' }
+  }
+};
+
 export default function BusinessFareSelector({ selectedFareType, onFareTypeChange }) {
   const fareTypes = Object.values(BUSINESS_FARE_TYPES);
 
@@ -108,6 +130,33 @@ export default function BusinessFareSelector({ selectedFareType, onFareTypeChang
                   </div>
                 </div>
               )}
+
+              {/* Fare Benefits Section */}
+              <div style={styles.fareBenefits}>
+                <div style={styles.benefitsTitle}>
+                  <span style={styles.benefitsIcon}>🎫</span>
+                  <span style={styles.benefitsTitleText}>Fare Benefits</span>
+                </div>
+                
+                <div style={styles.benefitsList}>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Cancellation:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].cancellation.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Date Change:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].dateChange.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Seat Choice:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].seatChoice.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Meals:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].meals.label}</span>
+                  </div>
+                </div>
+              </div>
               
               {/* Premium Badge */}
               <div style={styles.premiumBadge}>
@@ -337,5 +386,60 @@ const styles = {
     background: 'rgba(5, 150, 105, 0.1)',
     padding: '0.2rem 0.5rem',
     borderRadius: '4px',
+  },
+
+  // Fare Benefits Styles
+  fareBenefits: {
+    background: '#f1f5f9',
+    borderRadius: '8px',
+    padding: '1rem',
+    marginTop: '1rem',
+    border: '1px solid #cbd5e1',
+  },
+  
+  benefitsTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '0.75rem',
+  },
+  
+  benefitsIcon: {
+    fontSize: '1rem',
+  },
+  
+  benefitsTitleText: {
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: '#374151',
+  },
+  
+  benefitsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  
+  benefitItemNew: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: '0.25rem 0',
+    gap: '0.5rem',
+  },
+  
+  benefitLabelNew: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    fontWeight: '500',
+    minWidth: '80px',
+    flexShrink: 0,
+  },
+  
+  benefitValueNew: {
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    textAlign: 'right',
+    lineHeight: '1.2',
   },
 };

@@ -2,6 +2,28 @@
 
 import { PREMIUM_ECONOMY_FARE_TYPES } from '../utils/seatUtils';
 
+// Fare benefits for each Premium Economy fare type
+const FARE_BENEFITS = {
+  lite: {
+    cancellation: { status: 'fee', label: '⚠️ Fee applies' },
+    dateChange: { status: 'fee', label: '⚠️ Fee applies' },
+    seatChoice: { status: 'included', label: '✅ Included' },
+    meals: { status: 'included', label: '✅ Complimentary (Enhanced quality)' }
+  },
+  standard: {
+    cancellation: { status: 'free', label: '✅ Free before departure' },
+    dateChange: { status: 'free', label: '✅ Free' },
+    seatChoice: { status: 'premium', label: '⭐ Included (Extra legroom included)' },
+    meals: { status: 'premium', label: '⭐ Complimentary + Special meals' }
+  },
+  flex: {
+    cancellation: { status: 'free', label: '✅ Free anytime' },
+    dateChange: { status: 'free', label: '✅ Free' },
+    seatChoice: { status: 'premium', label: '⭐ All premium seats included' },
+    meals: { status: 'premium', label: '⭐ Premium complimentary meals' }
+  }
+};
+
 export default function PremiumEconomyFareSelector({ selectedFareType, onFareTypeChange }) {
   const fareTypes = Object.values(PREMIUM_ECONOMY_FARE_TYPES);
 
@@ -51,6 +73,33 @@ export default function PremiumEconomyFareSelector({ selectedFareType, onFareTyp
                   {fareType.baggage.checkin.modifications && (
                     <div style={styles.baggageExtra}>{fareType.baggage.checkin.modifications}</div>
                   )}
+                </div>
+              </div>
+
+              {/* Fare Benefits Section */}
+              <div style={styles.fareBenefits}>
+                <div style={styles.benefitsTitle}>
+                  <span style={styles.benefitsIcon}>🎫</span>
+                  <span style={styles.benefitsTitleText}>Fare Benefits</span>
+                </div>
+                
+                <div style={styles.benefitsList}>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Cancellation:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].cancellation.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Date Change:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].dateChange.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Seat Choice:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].seatChoice.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Meals:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].meals.label}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -207,6 +256,61 @@ const styles = {
   baggageExtra: {
     color: '#10b981',
     fontWeight: '500'
+  },
+
+  // Fare Benefits Styles
+  fareBenefits: {
+    background: '#f1f5f9',
+    borderRadius: '8px',
+    padding: '1rem',
+    marginTop: '1rem',
+    border: '1px solid #cbd5e1',
+  },
+  
+  benefitsTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '0.75rem',
+  },
+  
+  benefitsIcon: {
+    fontSize: '1rem',
+  },
+  
+  benefitsTitleText: {
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: '#374151',
+  },
+  
+  benefitsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  
+  benefitItemNew: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: '0.25rem 0',
+    gap: '0.5rem',
+  },
+  
+  benefitLabelNew: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    fontWeight: '500',
+    minWidth: '80px',
+    flexShrink: 0,
+  },
+  
+  benefitValueNew: {
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    textAlign: 'right',
+    lineHeight: '1.2',
   },
   
   selectedIndicator: {

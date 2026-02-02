@@ -262,7 +262,7 @@ export default function BaggageSelectionPage() {
     return baggageAllowances[cabinClass] || baggageAllowances['Economy'];
   };
 
-  const handleContinueToPayment = () => {
+  const handleContinueToMealSelection = () => {
     // Save baggage selection data
     const baggageSelectionData = {
       includedBaggage: getIncludedBaggage(),
@@ -294,7 +294,7 @@ export default function BaggageSelectionPage() {
     };
     
     localStorage.setItem('baggageSelection', JSON.stringify(baggageSelectionData));
-    router.push('/payment');
+    router.push('/meal-selection');
   };
 
   const handleSkipBaggageSelection = () => {
@@ -310,7 +310,7 @@ export default function BaggageSelectionPage() {
     };
     
     localStorage.setItem('baggageSelection', JSON.stringify(baggageSelectionData));
-    router.push('/payment');
+    router.push('/meal-selection');
   };
 
   if (!isLoaded) {
@@ -680,10 +680,10 @@ export default function BaggageSelectionPage() {
                 </button>
                 
                 <button
-                  onClick={handleContinueToPayment}
+                  onClick={handleContinueToMealSelection}
                   style={styles.continueButton}
                 >
-                  Continue to Payment
+                  Continue to Meal Selection
                   {totalBaggagePrice > 0 && (
                     <span style={styles.buttonPrice}>
                       (+{formatPrice(totalBaggagePrice, CURRENCY_CONFIG)})

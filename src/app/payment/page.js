@@ -44,12 +44,20 @@ export default function PaymentPage() {
   
   // Baggage selection state
   const [baggageSelection, setBaggageSelection] = useState(null);
+  
+  // Meal selection state
+  const [mealSelection, setMealSelection] = useState(null);
+  
+  // Travel insurance state
+  const [insuranceSelection, setInsuranceSelection] = useState(null);
 
   useEffect(() => {
     const flightData = localStorage.getItem('selectedFlight');
     const passengerData = localStorage.getItem('passengerDetails');
     const seatData = localStorage.getItem('seatSelection');
     const baggageData = localStorage.getItem('baggageSelection');
+    const mealData = localStorage.getItem('mealSelection');
+    const insuranceData = localStorage.getItem('insuranceSelection');
     
     if (!flightData || !passengerData) {
       router.push('/home');
@@ -68,6 +76,16 @@ export default function PaymentPage() {
       // Load baggage selection data if available
       if (baggageData) {
         setBaggageSelection(JSON.parse(baggageData));
+      }
+      
+      // Load meal selection data if available
+      if (mealData) {
+        setMealSelection(JSON.parse(mealData));
+      }
+      
+      // Load travel insurance data if available
+      if (insuranceData) {
+        setInsuranceSelection(JSON.parse(insuranceData));
       }
       
       setIsLoaded(true);
@@ -144,7 +162,13 @@ export default function PaymentPage() {
     // Add baggage selection charges if available
     const baggageCharges = baggageSelection ? baggageSelection.totalBaggagePrice : 0;
     
-    return flightTotal + seatCharges + baggageCharges;
+    // Add meal selection charges if available
+    const mealCharges = mealSelection ? mealSelection.totalMealPrice : 0;
+    
+    // Add travel insurance charges if available
+    const insuranceCharges = insuranceSelection ? insuranceSelection.totalCost : 0;
+    
+    return flightTotal + seatCharges + baggageCharges + mealCharges + insuranceCharges;
   };
 
   const getFormattedPrice = (amount) => {
@@ -181,8 +205,14 @@ export default function PaymentPage() {
     // Add baggage selection charges
     const baggageCharges = baggageSelection ? baggageSelection.totalBaggagePrice : 0;
     
+    // Add meal selection charges
+    const mealCharges = mealSelection ? mealSelection.totalMealPrice : 0;
+    
+    // Add travel insurance charges
+    const insuranceCharges = insuranceSelection ? insuranceSelection.totalCost : 0;
+    
     const currency = getCurrencyFromData(selectedFlight);
-    const grandTotal = flightPricing.total.amount + seatCharges + baggageCharges;
+    const grandTotal = flightPricing.total.amount + seatCharges + baggageCharges + mealCharges + insuranceCharges;
     
     return {
       flight: flightPricing,
@@ -193,6 +223,14 @@ export default function PaymentPage() {
       baggageCharges: {
         amount: baggageCharges,
         formatted: formatPrice(baggageCharges, currency)
+      },
+      mealCharges: {
+        amount: mealCharges,
+        formatted: formatPrice(mealCharges, currency)
+      },
+      insuranceCharges: {
+        amount: insuranceCharges,
+        formatted: formatPrice(insuranceCharges, currency)
       },
       grandTotal: {
         amount: grandTotal,
@@ -436,6 +474,56 @@ export default function PaymentPage() {
                     </div>
                   )}
                   
+                  {/* Meal Selection Section */}
+                  {mealSelection && !mealSelection.skipped && (
+                    <div style={styles.mealSelectionSection}>
+                      <div style={styles.mealHeader}>
+                        <span style={styles.mealTitle}>Meal Selection</span>
+                        <span style={styles.mealIcon}>🍽️</span>
+                      </div>
+                      
+                      <div style={styles.mealDetails}>
+                        <div style={styles.mealInfo}>
+                          <span style={styles.mealLabel}>Cabin Class:</span>
+                          <span style={styles.mealValue}>
+                            {mealSelection.mealConfig?.cabinClass} - {mealSelection.mealConfig?.fareType?.charAt(0).toUpperCase() + mealSelection.mealConfig?.fareType?.slice(1)}
+                          </span>
+                        </div>
+                        
+                        {mealSelection.mealConfig?.eligibility && (
+                          <div style={styles.mealInfo}>
+                            <span style={styles.mealLabel}>Meal Eligibility:</span>
+                            <span style={styles.mealValue}>
+                              {mealSelection.mealConfig.eligibility.message}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {mealSelection.mealSummary && mealSelection.mealSummary.length > 0 && (
+                          <div style={styles.selectedMealsList}>
+                            <span style={styles.mealSubtitle}>Selected Meals:</span>
+                            {mealSelection.mealSummary.map((meal, index) => (
+                              <div key={index} style={styles.mealItem}>
+                                <span style={styles.mealPassenger}>{meal.passenger}</span>
+                                <span style={styles.mealOption}>{meal.meal} ({meal.type})</span>
+                                <span style={styles.mealPrice}>
+                                  {meal.price > 0 ? getFormattedPrice(meal.price) : 'Free'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {(!mealSelection.mealSummary || mealSelection.mealSummary.length === 0) && (
+                          <div style={styles.mealInfo}>
+                            <span style={styles.mealLabel}>Status:</span>
+                            <span style={styles.mealValue}>No meals selected</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Enhanced Price Breakdown */}
                   <div style={styles.priceBreakdown}>
                     <div style={styles.priceHeader}>
@@ -462,6 +550,18 @@ export default function PaymentPage() {
                         <div style={styles.priceRow}>
                           <span style={styles.priceLabel}>Baggage Charges</span>
                           <span style={styles.priceValue}>{getPriceBreakdown().baggageCharges.formatted}</span>
+                        </div>
+                      )}
+                      {mealSelection && mealSelection.totalMealPrice > 0 && (
+                        <div style={styles.priceRow}>
+                          <span style={styles.priceLabel}>Meal Charges</span>
+                          <span style={styles.priceValue}>{getPriceBreakdown().mealCharges.formatted}</span>
+                        </div>
+                      )}
+                      {insuranceSelection && insuranceSelection.totalCost > 0 && (
+                        <div style={styles.priceRow}>
+                          <span style={styles.priceLabel}>Travel Insurance</span>
+                          <span style={styles.priceValue}>{getPriceBreakdown().insuranceCharges.formatted}</span>
                         </div>
                       )}
                       <div style={styles.serviceFeeRow}>
@@ -735,10 +835,10 @@ export default function PaymentPage() {
               {/* Back Button */}
               <div style={styles.backButtonRow}>
                 <button
-                  onClick={() => router.push('/baggage-selection')}
+                  onClick={() => router.push('/travel-insurance')}
                   style={styles.backButton}
                 >
-                  ← Back to Baggage Selection
+                  ← Back to Travel Insurance
                 </button>
               </div>
             </div>
@@ -1235,6 +1335,102 @@ const styles = {
   },
   
   baggagePrice: {
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: '#059669',
+  },
+  
+  // Meal Selection Styles
+  mealSelectionSection: {
+    background: 'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+    color: '#2d3748',
+  },
+  
+  mealHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1rem',
+  },
+  
+  mealTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '700',
+    color: '#2d3748',
+  },
+  
+  mealIcon: {
+    fontSize: '1.5rem',
+    opacity: 0.8,
+  },
+  
+  mealDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+  },
+  
+  mealInfo: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: '8px',
+    padding: '1rem',
+  },
+  
+  mealLabel: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  
+  mealValue: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#2d3748',
+  },
+  
+  mealSubtitle: {
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '0.5rem',
+    display: 'block',
+  },
+  
+  selectedMealsList: {
+    background: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: '8px',
+    padding: '1rem',
+  },
+  
+  mealItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.5rem 0',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
+  },
+  
+  mealPassenger: {
+    fontSize: '0.85rem',
+    fontWeight: '500',
+    color: '#374151',
+    flex: 1,
+  },
+  
+  mealOption: {
+    fontSize: '0.85rem',
+    fontWeight: '500',
+    color: '#2d3748',
+    marginRight: '0.5rem',
+  },
+  
+  mealPrice: {
     fontSize: '0.85rem',
     fontWeight: '600',
     color: '#059669',

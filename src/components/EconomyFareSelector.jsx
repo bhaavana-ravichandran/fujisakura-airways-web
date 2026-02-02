@@ -21,6 +21,28 @@ const BAGGAGE_ALLOWANCES = {
   }
 };
 
+// Fare benefits for each fare type
+const FARE_BENEFITS = {
+  saver: {
+    cancellation: { status: 'paid', label: '💰 Paid' },
+    dateChange: { status: 'paid', label: '💰 Paid' },
+    seatChoice: { status: 'paid', label: '💰 Paid' },
+    meals: { status: 'paid', label: '💰 Paid' }
+  },
+  base: {
+    cancellation: { status: 'fee', label: '⚠️ Fee applies' },
+    dateChange: { status: 'fee', label: '⚠️ Fee applies' },
+    seatChoice: { status: 'included', label: '✅ Standard seats included' },
+    meals: { status: 'included', label: '✅ Complimentary (Veg / Non-Veg)' }
+  },
+  green: {
+    cancellation: { status: 'free', label: '✅ Free before departure' },
+    dateChange: { status: 'free', label: '✅ Free' },
+    seatChoice: { status: 'premium', label: '⭐ Included (Priority seats may cost extra)' },
+    meals: { status: 'premium', label: '⭐ Complimentary + Special meal requests' }
+  }
+};
+
 export default function EconomyFareSelector({ selectedFareType, onFareTypeChange }) {
   const fareTypes = Object.values(ECONOMY_FARE_TYPES);
 
@@ -91,6 +113,33 @@ export default function EconomyFareSelector({ selectedFareType, onFareTypeChange
                   </div>
                   <div style={styles.baggageNote}>
                     {BAGGAGE_ALLOWANCES[fareType.id].checkinNote}
+                  </div>
+                </div>
+              </div>
+
+              {/* Fare Benefits Section */}
+              <div style={styles.fareBenefits}>
+                <div style={styles.benefitsTitle}>
+                  <span style={styles.benefitsIcon}>🎫</span>
+                  <span style={styles.benefitsTitleText}>Fare Benefits</span>
+                </div>
+                
+                <div style={styles.benefitsList}>
+                  <div style={styles.benefitItem}>
+                    <span style={styles.benefitLabel}>Cancellation:</span>
+                    <span style={styles.benefitValue}>{FARE_BENEFITS[fareType.id].cancellation.label}</span>
+                  </div>
+                  <div style={styles.benefitItem}>
+                    <span style={styles.benefitLabel}>Date Change:</span>
+                    <span style={styles.benefitValue}>{FARE_BENEFITS[fareType.id].dateChange.label}</span>
+                  </div>
+                  <div style={styles.benefitItem}>
+                    <span style={styles.benefitLabel}>Seat Choice:</span>
+                    <span style={styles.benefitValue}>{FARE_BENEFITS[fareType.id].seatChoice.label}</span>
+                  </div>
+                  <div style={styles.benefitItem}>
+                    <span style={styles.benefitLabel}>Meals:</span>
+                    <span style={styles.benefitValue}>{FARE_BENEFITS[fareType.id].meals.label}</span>
                   </div>
                 </div>
               </div>
@@ -291,6 +340,61 @@ const styles = {
     fontStyle: 'italic',
     textAlign: 'center',
     marginTop: '0.25rem',
+  },
+
+  // Fare Benefits Styles
+  fareBenefits: {
+    background: '#f1f5f9',
+    borderRadius: '8px',
+    padding: '1rem',
+    marginBottom: '1rem',
+    border: '1px solid #cbd5e1',
+  },
+  
+  benefitsTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '0.75rem',
+  },
+  
+  benefitsIcon: {
+    fontSize: '1rem',
+  },
+  
+  benefitsTitleText: {
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: '#374151',
+  },
+  
+  benefitsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  
+  benefitItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: '0.25rem 0',
+    gap: '0.5rem',
+  },
+  
+  benefitLabel: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    fontWeight: '500',
+    minWidth: '80px',
+    flexShrink: 0,
+  },
+  
+  benefitValue: {
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    textAlign: 'right',
+    lineHeight: '1.2',
   },
   
   separator: {

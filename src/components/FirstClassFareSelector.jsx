@@ -2,6 +2,28 @@
 
 import { FIRST_CLASS_FARE_TYPES } from '../utils/seatUtils';
 
+// Fare benefits for First Class (all fare types reflect luxury experience)
+const FARE_BENEFITS = {
+  standard: {
+    cancellation: { status: 'refundable', label: '✅ Fully refundable' },
+    dateChange: { status: 'unlimited', label: '✅ Unlimited changes' },
+    seatChoice: { status: 'suite', label: '⭐ All suites included with priority choice' },
+    meals: { status: 'luxury', label: '⭐ À la carte luxury dining with full customization' }
+  },
+  flex: {
+    cancellation: { status: 'refundable', label: '✅ Fully refundable' },
+    dateChange: { status: 'unlimited', label: '✅ Unlimited changes' },
+    seatChoice: { status: 'suite', label: '⭐ All suites included with priority choice' },
+    meals: { status: 'luxury', label: '⭐ À la carte luxury dining with full customization' }
+  },
+  suite: {
+    cancellation: { status: 'refundable', label: '✅ Fully refundable' },
+    dateChange: { status: 'unlimited', label: '✅ Unlimited changes' },
+    seatChoice: { status: 'suite', label: '⭐ All suites included with priority choice' },
+    meals: { status: 'luxury', label: '⭐ À la carte luxury dining with full customization' }
+  }
+};
+
 export default function FirstClassFareSelector({ selectedFareType, onFareTypeChange }) {
   const fareTypes = Object.values(FIRST_CLASS_FARE_TYPES);
 
@@ -58,6 +80,33 @@ export default function FirstClassFareSelector({ selectedFareType, onFareTypeCha
                 <div style={styles.baggageDetails}>
                   <div>Cabin: {fareType.baggage.cabin.weight}</div>
                   <div>Check-in: {fareType.baggage.checkin.included}</div>
+                </div>
+              </div>
+
+              {/* Enhanced Fare Benefits Section */}
+              <div style={styles.fareBenefits}>
+                <div style={styles.benefitsTitle}>
+                  <span style={styles.benefitsIcon}>🎫</span>
+                  <span style={styles.benefitsTitleText}>Luxury Benefits</span>
+                </div>
+                
+                <div style={styles.benefitsList}>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Cancellation:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].cancellation.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Date Change:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].dateChange.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Seat Choice:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].seatChoice.label}</span>
+                  </div>
+                  <div style={styles.benefitItemNew}>
+                    <span style={styles.benefitLabelNew}>Meals:</span>
+                    <span style={styles.benefitValueNew}>{FARE_BENEFITS[fareType.id].meals.label}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -212,6 +261,62 @@ const styles = {
     gap: '4px',
     fontSize: '0.8rem',
     color: '#6b7280'
+  },
+
+  // Enhanced Fare Benefits Styles
+  fareBenefits: {
+    background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+    borderRadius: '8px',
+    padding: '1rem',
+    marginTop: '1rem',
+    border: '1px solid #f59e0b',
+  },
+  
+  benefitsTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '0.75rem',
+  },
+  
+  benefitsIcon: {
+    fontSize: '1rem',
+  },
+  
+  benefitsTitleText: {
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: '#92400e',
+  },
+  
+  benefitsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  
+  benefitItemNew: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: '0.25rem 0',
+    gap: '0.5rem',
+  },
+  
+  benefitLabelNew: {
+    fontSize: '0.8rem',
+    color: '#a16207',
+    fontWeight: '500',
+    minWidth: '80px',
+    flexShrink: 0,
+  },
+  
+  benefitValueNew: {
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    textAlign: 'right',
+    lineHeight: '1.2',
+    color: '#92400e',
   },
   
   selectedIndicator: {
