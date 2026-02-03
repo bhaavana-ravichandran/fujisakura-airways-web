@@ -903,10 +903,10 @@ export default function PaymentPage() {
               {/* Back Button */}
               <div style={styles.backButtonRow}>
                 <button
-                  onClick={() => router.push('/travel-insurance')}
+                  onClick={() => router.push('/preview')}
                   style={styles.backButton}
                 >
-                  ← Back to Travel Insurance
+                  ← Back to Review
                 </button>
               </div>
             </div>

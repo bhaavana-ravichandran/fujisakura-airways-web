@@ -254,7 +254,8 @@ export default function SeatSelectionPage() {
       seatSelectionData = {
         selectedSeats,
         cabinClass: selectedCabinClass,
-        fareType: selectedFareType,
+        fareType: selectedFareType, // Unified fareType key
+        selectedFareType: selectedFareType, // Keep for backward compatibility
         fareMultiplier: fareMultiplier,
         totalSeatPrice,
         seatSummary: Object.entries(selectedSeats).map(([passengerKey, seat]) => ({
@@ -268,7 +269,8 @@ export default function SeatSelectionPage() {
       seatSelectionData = {
         selectedSeats,
         cabinClass: selectedCabinClass,
-        premiumEconomyFareType: selectedPremiumEconomyFareType,
+        fareType: selectedPremiumEconomyFareType, // Unified fareType key
+        premiumEconomyFareType: selectedPremiumEconomyFareType, // Keep for backward compatibility
         totalSeatPrice,
         seatSummary: Object.entries(selectedSeats).map(([passengerKey, seat]) => ({
           passenger: passengerKey.replace('_', ' '),
@@ -281,7 +283,8 @@ export default function SeatSelectionPage() {
       seatSelectionData = {
         selectedSeats,
         cabinClass: selectedCabinClass,
-        businessFareType: selectedBusinessFareType,
+        fareType: selectedBusinessFareType, // Unified fareType key
+        businessFareType: selectedBusinessFareType, // Keep for backward compatibility
         totalSeatPrice,
         seatSummary: Object.entries(selectedSeats).map(([passengerKey, seat]) => ({
           passenger: passengerKey.replace('_', ' '),
@@ -294,7 +297,8 @@ export default function SeatSelectionPage() {
       seatSelectionData = {
         selectedSeats,
         cabinClass: selectedCabinClass,
-        firstClassFareType: selectedFirstClassFareType,
+        fareType: selectedFirstClassFareType, // Unified fareType key
+        firstClassFareType: selectedFirstClassFareType, // Keep for backward compatibility
         totalSeatPrice,
         seatSummary: Object.entries(selectedSeats).map(([passengerKey, seat]) => ({
           passenger: passengerKey.replace('_', ' '),
@@ -308,6 +312,7 @@ export default function SeatSelectionPage() {
       seatSelectionData = {
         selectedSeats,
         cabinClass: selectedCabinClass,
+        fareType: 'Standard', // Default fareType for other classes
         totalSeatPrice,
         seatSummary: Object.entries(selectedSeats).map(([passengerKey, seat]) => ({
           passenger: passengerKey.replace('_', ' '),

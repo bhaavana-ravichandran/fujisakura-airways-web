@@ -69,11 +69,13 @@ export default function TravelInsurancePage() {
       selectionType: insuranceSelection,
       costPerTraveler: INSURANCE_COST_PER_TRAVELER,
       totalCost: totalInsuranceCost,
-      travelers: passengerDetails.length
+      travelers: passengerDetails.length,
+      selected: insuranceSelection === 'yes',
+      price: INSURANCE_COST_PER_TRAVELER
     };
     
     localStorage.setItem('insuranceSelection', JSON.stringify(insuranceSelectionData));
-    router.push('/payment');
+    router.push('/preview');
   };
 
   if (!isLoaded) {
@@ -264,7 +266,7 @@ export default function TravelInsurancePage() {
                   onClick={handleContinueToPayment}
                   style={styles.continueButton}
                 >
-                  Continue to Payment
+                  Continue to Review
                   {insuranceSelection === 'yes' && (
                     <span style={styles.buttonPrice}>
                       (+₹{INSURANCE_COST_PER_TRAVELER * passengerDetails.length})
