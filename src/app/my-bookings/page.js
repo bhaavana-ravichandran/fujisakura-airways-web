@@ -178,7 +178,12 @@ export default function MyBookingsPage() {
                       </div>
                       <div style={styles.detailItem}>
                         <span style={styles.detailLabel}>Passengers:</span>
-                        <span style={styles.detailValue}>{booking.passengers.length}</span>
+                        <span style={styles.detailValue}>
+                          {Array.isArray(booking.passengers) 
+                            ? booking.passengers.length 
+                            : (booking.passengers?.passengers?.length || 0)
+                          }
+                        </span>
                       </div>
                       <div style={styles.detailItem}>
                         <span style={styles.detailLabel}>Booking Date:</span>
@@ -199,19 +204,26 @@ export default function MyBookingsPage() {
                     {expandedBooking === booking.bookingId && (
                       <div style={styles.passengerDetails}>
                         <h3 style={styles.passengerTitle}>Passenger Details</h3>
-                        {booking.passengers.map((passenger, index) => (
-                          <div key={index} style={styles.passengerCard}>
-                            <h4 style={styles.passengerName}>
-                              Passenger {index + 1}: {passenger.firstName} {passenger.lastName}
-                            </h4>
-                            <div style={styles.passengerInfo}>
-                              <span><strong>Gender:</strong> {passenger.gender}</span>
-                              <span><strong>Age:</strong> {passenger.age}</span>
-                              {passenger.email && <span><strong>Email:</strong> {passenger.email}</span>}
-                              {passenger.phone && <span><strong>Phone:</strong> {passenger.phone}</span>}
+                        {(() => {
+                          // Handle both old array format and new object format
+                          const passengerList = Array.isArray(booking.passengers) 
+                            ? booking.passengers 
+                            : (booking.passengers?.passengers || []);
+                          
+                          return passengerList.map((passenger, index) => (
+                            <div key={index} style={styles.passengerCard}>
+                              <h4 style={styles.passengerName}>
+                                Passenger {index + 1}: {passenger.firstName} {passenger.lastName}
+                              </h4>
+                              <div style={styles.passengerInfo}>
+                                <span><strong>Gender:</strong> {passenger.gender}</span>
+                                <span><strong>Age:</strong> {passenger.age}</span>
+                                {passenger.email && <span><strong>Email:</strong> {passenger.email}</span>}
+                                {passenger.phone && <span><strong>Phone:</strong> {passenger.phone}</span>}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ));
+                        })()}
                       </div>
                     )}
 

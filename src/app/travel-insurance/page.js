@@ -33,10 +33,13 @@ export default function TravelInsurancePage() {
 
     try {
       const flight = JSON.parse(flightData);
-      const passengers = JSON.parse(passengerData);
+      const passengerDataObj = JSON.parse(passengerData);
       const seats = seatData ? JSON.parse(seatData) : null;
       const baggage = baggageData ? JSON.parse(baggageData) : null;
       const meals = mealData ? JSON.parse(mealData) : null;
+      
+      // Handle both old and new data structures
+      const passengers = passengerDataObj.passengers || passengerDataObj;
       
       setSelectedFlight(flight);
       setPassengerDetails(passengers);

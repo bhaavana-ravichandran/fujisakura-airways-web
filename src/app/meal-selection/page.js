@@ -1173,9 +1173,12 @@ export default function MealSelectionPage() {
 
     try {
       const flight = JSON.parse(flightData);
-      const passengers = JSON.parse(passengerData);
+      const passengerDataObj = JSON.parse(passengerData);
       const seats = seatData ? JSON.parse(seatData) : null;
       const baggage = baggageData ? JSON.parse(baggageData) : null;
+      
+      // Handle both old and new data structures
+      const passengers = passengerDataObj.passengers || passengerDataObj;
       
       setSelectedFlight(flight);
       setPassengerDetails(passengers);

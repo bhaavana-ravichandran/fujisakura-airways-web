@@ -41,7 +41,10 @@ export default function SeatSelectionPage() {
 
     try {
       const flight = JSON.parse(flightData);
-      const passengers = JSON.parse(passengerData);
+      const passengerDataObj = JSON.parse(passengerData);
+      
+      // Handle both old and new data structures
+      const passengers = passengerDataObj.passengers || passengerDataObj;
       
       setSelectedFlight(flight);
       setPassengerDetails(passengers);

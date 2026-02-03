@@ -50,6 +50,9 @@ export default function PaymentPage() {
   
   // Travel insurance state
   const [insuranceSelection, setInsuranceSelection] = useState(null);
+  
+  // Special assistance state
+  const [specialAssistanceSelection, setSpecialAssistanceSelection] = useState(null);
 
   useEffect(() => {
     const flightData = localStorage.getItem('selectedFlight');
@@ -66,7 +69,14 @@ export default function PaymentPage() {
 
     try {
       setSelectedFlight(JSON.parse(flightData));
-      setPassengerDetails(JSON.parse(passengerData));
+      
+      // Handle both old and new data structures for passenger details
+      const passengerDataObj = JSON.parse(passengerData);
+      const passengers = passengerDataObj.passengers || passengerDataObj;
+      const specialAssistance = passengerDataObj.specialAssistance || null;
+      
+      setPassengerDetails(passengers);
+      setSpecialAssistanceSelection(specialAssistance);
       
       // Load seat selection data if available
       if (seatData) {
@@ -94,6 +104,19 @@ export default function PaymentPage() {
       router.push('/home');
     }
   }, [router]);
+
+  // Helper function to get readable assistance labels
+  const getAssistanceLabel = (assistanceId) => {
+    const labels = {
+      serviceAnimal: 'Service Animal',
+      visuallyImpaired: 'Visually Impaired Assistance',
+      hearingImpaired: 'Hearing Impaired Assistance',
+      mobilityAssistance: 'Mobility Assistance (Wheelchair)',
+      medicalEquipment: 'Medical Equipment Assistance',
+      elderlyAssistance: 'Elderly Passenger Assistance'
+    };
+    return labels[assistanceId] || assistanceId;
+  };
 
   const handleCardInputChange = (field, value) => {
     let processedValue = value;
@@ -361,6 +384,51 @@ export default function PaymentPage() {
                       ))}
                     </div>
                   </div>
+                  
+                  {/* Special Assistance Section */}
+                  {specialAssistanceSelection && Object.keys(specialAssistanceSelection).length > 0 && (
+                    <div style={styles.specialAssistanceSection}>
+                      <div style={styles.assistanceHeader}>
+                        <span style={styles.assistanceTitle}>Special Assistance</span>
+                        <span style={styles.assistanceIcon}>🐾</span>
+                      </div>
+                      
+                      <div style={styles.assistanceDetails}>
+                        {Object.entries(specialAssistanceSelection).map(([passengerIndex, assistanceOptions]) => {
+                          const selectedOptions = Object.entries(assistanceOptions)
+                            .filter(([_, isSelected]) => isSelected)
+                            .map(([assistanceId, _]) => assistanceId);
+                          
+                          if (selectedOptions.length === 0) return null;
+                          
+                          const passenger = passengerDetails[parseInt(passengerIndex)];
+                          
+                          return (
+                            <div key={passengerIndex} style={styles.assistanceItem}>
+                              <span style={styles.assistancePassenger}>
+                                {passenger?.firstName} {passenger?.lastName}
+                              </span>
+                              <div style={styles.assistanceOptions}>
+                                {selectedOptions.map((assistanceId, index) => (
+                                  <span key={assistanceId} style={styles.assistanceOption}>
+                                    {getAssistanceLabel(assistanceId)}
+                                    {index < selectedOptions.length - 1 && ', '}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      <div style={styles.assistanceNote}>
+                        <span style={styles.noteIcon}>ℹ️</span>
+                        <span style={styles.noteText}>
+                          Special assistance requests will be reviewed and confirmed post-booking
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Seat Selection Section */}
                   {seatSelection && (
@@ -1844,5 +1912,92 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
+  },
+  
+  // Special Assistance Section Styles
+  specialAssistanceSection: {
+    background: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+    border: '2px solid rgba(139, 69, 19, 0.1)',
+  },
+  
+  assistanceHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1rem',
+    paddingBottom: '0.75rem',
+    borderBottom: '2px solid #f1f5f9',
+  },
+  
+  assistanceTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#2d3748',
+  },
+  
+  assistanceIcon: {
+    fontSize: '1.5rem',
+  },
+  
+  assistanceDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+  },
+  
+  assistanceItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: '0.75rem',
+    background: 'rgba(139, 69, 19, 0.05)',
+    borderRadius: '8px',
+    border: '1px solid rgba(139, 69, 19, 0.1)',
+  },
+  
+  assistancePassenger: {
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    color: '#2d3748',
+    minWidth: '120px',
+  },
+  
+  assistanceOptions: {
+    flex: 1,
+    marginLeft: '1rem',
+  },
+  
+  assistanceOption: {
+    fontSize: '0.85rem',
+    color: '#4a5568',
+    fontWeight: '500',
+    lineHeight: '1.4',
+  },
+  
+  assistanceNote: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginTop: '1rem',
+    padding: '0.75rem',
+    background: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: '8px',
+    border: '1px solid rgba(59, 130, 246, 0.2)',
+  },
+  
+  noteIcon: {
+    fontSize: '1rem',
+    color: '#3b82f6',
+  },
+  
+  noteText: {
+    fontSize: '0.85rem',
+    color: '#1e40af',
+    fontWeight: '500',
+    lineHeight: '1.4',
   },
 };

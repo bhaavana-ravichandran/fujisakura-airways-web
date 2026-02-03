@@ -591,7 +591,10 @@ export const getSeatStatusColor = (status, isSelected = false) => {
 export const validateSeatSelection = (selectedSeats, passengers) => {
   const errors = [];
   
-  if (Object.keys(selectedSeats).length !== passengers.length) {
+  // Handle both old array format and new object format
+  const passengerList = Array.isArray(passengers) ? passengers : (passengers?.passengers || []);
+  
+  if (Object.keys(selectedSeats).length !== passengerList.length) {
     errors.push('Please select seats for all passengers');
   }
   

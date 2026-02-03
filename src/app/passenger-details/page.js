@@ -13,6 +13,11 @@ export default function PassengerDetailsPage() {
   const [passengerDetails, setPassengerDetails] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isSpecialAssistanceExpanded, setIsSpecialAssistanceExpanded] = useState(false);
+  const [specialAssistanceSelections, setSpecialAssistanceSelections] = useState({});
+  const [needsSpecialAssistance, setNeedsSpecialAssistance] = useState(false);
+  const [specialAssistanceData, setSpecialAssistanceData] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Check if flight data exists in localStorage
@@ -49,6 +54,27 @@ export default function PassengerDetailsPage() {
     }
   }, [router]);
 
+  // Handle modal keyboard events
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+
+    if (isModalOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isModalOpen]);
+
   const handleInputChange = (passengerIndex, field, value) => {
     let processedValue = value;
     
@@ -77,6 +103,26 @@ export default function PassengerDetailsPage() {
         return newErrors;
       });
     }
+  };
+
+  const handleSpecialAssistanceChange = (passengerIndex, assistanceType, isSelected) => {
+    setSpecialAssistanceSelections(prev => ({
+      ...prev,
+      [passengerIndex]: {
+        ...prev[passengerIndex],
+        [assistanceType]: isSelected
+      }
+    }));
+  };
+
+  const handleAssistanceOptionChange = (passengerIndex, option, value) => {
+    setSpecialAssistanceData(prev => ({
+      ...prev,
+      [passengerIndex]: {
+        ...prev[passengerIndex],
+        [option]: value
+      }
+    }));
   };
 
   const validateForm = () => {
@@ -129,8 +175,12 @@ export default function PassengerDetailsPage() {
       return;
     }
     
-    // Store passenger details in localStorage
-    localStorage.setItem('passengerDetails', JSON.stringify(passengerDetails));
+    // Store passenger details and special assistance in localStorage
+    const passengerData = {
+      passengers: passengerDetails,
+      specialAssistance: specialAssistanceSelections
+    };
+    localStorage.setItem('passengerDetails', JSON.stringify(passengerData));
     
     // Navigate to seat selection page
     router.push('/seat-selection');
@@ -141,8 +191,12 @@ export default function PassengerDetailsPage() {
       return;
     }
     
-    // Store passenger details in localStorage
-    localStorage.setItem('passengerDetails', JSON.stringify(passengerDetails));
+    // Store passenger details and special assistance in localStorage
+    const passengerData = {
+      passengers: passengerDetails,
+      specialAssistance: specialAssistanceSelections
+    };
+    localStorage.setItem('passengerDetails', JSON.stringify(passengerData));
     
     // Clear any existing seat selection data
     localStorage.removeItem('seatSelection');
@@ -351,6 +405,30 @@ export default function PassengerDetailsPage() {
             </div>
           ))}
 
+          {/* Special Assistance Section */}
+          <div style={styles.specialAssistanceSection}>
+            <div style={styles.specialAssistanceHeader}>
+              <div style={styles.headerContent}>
+                <span style={styles.headerIcon}>🐾</span>
+                <div style={styles.headerText}>
+                  <h3 style={styles.headerTitle}>Special Assistance (Per Passenger)</h3>
+                  <p style={styles.headerSubtitle}>
+                    These requests apply after passenger details are completed and will be reviewed post-booking.
+                  </p>
+                  <p style={styles.learnMoreText}>
+                    <button 
+                      onClick={() => setIsModalOpen(true)}
+                      style={styles.policyButton}
+                      type="button"
+                    >
+                      Request Special Assistance <span style={styles.infoIcon}>ℹ️</span>
+                    </button>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Continue Button */}
           <div style={styles.buttonContainer}>
             <button
@@ -377,14 +455,160 @@ export default function PassengerDetailsPage() {
         </div>
       </div>
 
+      {/* Special Assistance Policy Modal */}
+      {isModalOpen && (
+        <div 
+          style={styles.modalOverlay}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsModalOpen(false);
+            }
+          }}
+        >
+          <div style={styles.modalContent}>
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>Special Assistance Request & Policy</h2>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                style={styles.modalCloseButton}
+                type="button"
+              >
+                ❌
+              </button>
+            </div>
+            
+            <div style={styles.modalBody}>
+              {/* A. Request Special Assistance (FIRST SECTION) */}
+              <div style={styles.assistanceSelectionSection}>
+                <h4 style={styles.selectionTitle}>Request Special Assistance</h4>
+                <p style={styles.selectionSubtitle}>
+                  Select the assistance you need for each passenger
+                </p>
+                
+                {passengerDetails.map((passenger, passengerIndex) => (
+                  <div key={passengerIndex} style={styles.passengerAssistanceCard}>
+                    <div style={styles.passengerAssistanceHeader}>
+                      <span style={styles.passengerIcon}>👤</span>
+                      <span style={styles.passengerAssistanceName}>
+                        Passenger {passengerIndex + 1}
+                        {passenger.firstName && passenger.lastName && 
+                          ` (${passenger.firstName} ${passenger.lastName})`
+                        } – Assistance Options
+                      </span>
+                    </div>
+                    
+                    <div style={styles.assistanceOptionsGrid}>
+                      {[
+                        { id: 'serviceAnimal', label: 'Service Animal', icon: '🦮' },
+                        { id: 'visuallyImpaired', label: 'Visually Impaired Assistance', icon: '👁️' },
+                        { id: 'hearingImpaired', label: 'Hearing Impaired Assistance', icon: '👂' },
+                        { id: 'mobilityAssistance', label: 'Mobility Assistance (Wheelchair)', icon: '♿' },
+                        { id: 'medicalEquipment', label: 'Medical Equipment Assistance', icon: '🏥' },
+                        { id: 'elderlyAssistance', label: 'Elderly Passenger Assistance', icon: '👴' }
+                      ].map((option) => (
+                        <label key={option.id} style={styles.assistanceOption}>
+                          <input
+                            type="checkbox"
+                            checked={specialAssistanceSelections[passengerIndex]?.[option.id] || false}
+                            onChange={(e) => handleSpecialAssistanceChange(passengerIndex, option.id, e.target.checked)}
+                            style={styles.assistanceCheckbox}
+                          />
+                          <div style={styles.assistanceOptionContent}>
+                            <span style={styles.assistanceIcon}>{option.icon}</span>
+                            <span style={styles.assistanceLabel}>{option.label}</span>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* B. Section Divider */}
+              <div style={styles.modalDivider}></div>
+
+              {/* C. Service Animal Policy (SECOND SECTION) */}
+              <div style={styles.serviceAnimalInfo}>
+                <h4 style={styles.infoTitle}>Service Animal Policy</h4>
+                
+                <div style={styles.infoGrid}>
+                  <div style={styles.infoCard}>
+                    <div style={styles.infoCardHeader}>
+                      <span style={styles.cardIcon}>🦮</span>
+                      <span style={styles.cardTitle}>Allowed Animals</span>
+                    </div>
+                    <p style={styles.cardText}>
+                      Only trained service dogs are allowed. No pets or emotional support animals are permitted.
+                    </p>
+                  </div>
+
+                  <div style={styles.infoCard}>
+                    <div style={styles.infoCardHeader}>
+                      <span style={styles.cardIcon}>📋</span>
+                      <span style={styles.cardTitle}>Required Documentation</span>
+                    </div>
+                    <ul style={styles.documentList}>
+                      <li>Medical certificate</li>
+                      <li>Vaccination proof</li>
+                      <li>Training certificate</li>
+                    </ul>
+                  </div>
+
+                  <div style={styles.infoCard}>
+                    <div style={styles.infoCardHeader}>
+                      <span style={styles.cardIcon}>✈️</span>
+                      <span style={styles.cardTitle}>Travel Requirements</span>
+                    </div>
+                    <ul style={styles.requirementsList}>
+                      <li>One service animal per passenger</li>
+                      <li>Dogs must remain harnessed and under control</li>
+                      <li>Notification required prior to travel</li>
+                    </ul>
+                  </div>
+
+                  <div style={styles.infoCard}>
+                    <div style={styles.infoCardHeader}>
+                      <span style={styles.cardIcon}>💺</span>
+                      <span style={styles.cardTitle}>Seating & Safety</span>
+                    </div>
+                    <p style={styles.cardText}>
+                      Seating will be arranged to safely accommodate the animal. Compliance with aviation safety regulations is mandatory.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={styles.importantNotice}>
+                  <div style={styles.noticeHeader}>
+                    <span style={styles.noticeIcon}>⚠️</span>
+                    <span style={styles.noticeTitle}>Important Notice</span>
+                  </div>
+                  <div style={styles.noticeContent}>
+                    <p style={styles.noticeText}>
+                      • The airline will contact you post-booking for approval and verification
+                    </p>
+                    <p style={styles.noticeText}>
+                      • No additional charge for service animals
+                    </p>
+                    <p style={styles.noticeText}>
+                      • All documentation must be provided before travel
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <div className="relative z-20">
         <Footer />
       </div>
     </div>
   );
-}
+} // End of PassengerDetailsPage component
 
+// Styles object
 const styles = {
   pageContainer: {
     minHeight: '100vh',
@@ -602,5 +826,359 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-  }
+  },
+
+  // Visual Divider Style
+  sectionDivider: {
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent, #e2e8f0, transparent)',
+    margin: '40px 0 30px 0',
+    position: 'relative',
+  },
+
+  // Special Assistance Section Styles
+  specialAssistanceSection: {
+    background: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: '16px',
+    marginBottom: '25px',
+    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.08)',
+    backdropFilter: 'blur(10px)',
+    border: '2px solid rgba(0, 123, 255, 0.1)',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+
+  specialAssistanceHeader: {
+    padding: '20px 25px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: '16px',
+  },
+
+  headerContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '15px',
+  },
+
+  headerIcon: {
+    fontSize: '2rem',
+    flexShrink: 0,
+  },
+
+  headerText: {
+    flex: 1,
+  },
+
+  headerTitle: {
+    fontSize: '1.3rem',
+    fontWeight: '600',
+    color: '#2c3e50',
+    margin: '0 0 8px 0',
+  },
+
+  headerSubtitle: {
+    fontSize: '0.9rem',
+    color: '#6c757d',
+    margin: '0 0 5px 0',
+    lineHeight: '1.4',
+    fontWeight: '500',
+  },
+
+  learnMoreText: {
+    margin: 0,
+  },
+
+  policyButton: {
+    background: 'linear-gradient(135deg, #007bff, #0056b3)',
+    border: 'none',
+    color: 'white',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontSize: '0.95rem',
+    padding: '12px 20px',
+    borderRadius: '8px',
+    fontFamily: 'inherit',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(0, 123, 255, 0.3)',
+  },
+
+  infoIcon: {
+    fontSize: '0.9rem',
+    marginLeft: '4px',
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    padding: '20px',
+  },
+
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    maxWidth: '900px',
+    width: '100%',
+    maxHeight: '90vh',
+    overflow: 'hidden',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '20px 25px',
+    borderBottom: '2px solid #f1f5f9',
+    backgroundColor: '#f8fafc',
+  },
+
+  modalTitle: {
+    fontSize: '1.4rem',
+    fontWeight: '600',
+    color: '#2c3e50',
+    margin: 0,
+  },
+
+  modalCloseButton: {
+    background: 'none',
+    border: 'none',
+    fontSize: '1.2rem',
+    cursor: 'pointer',
+    padding: '5px',
+    borderRadius: '4px',
+    transition: 'background-color 0.2s ease',
+  },
+
+  modalBody: {
+    padding: '25px',
+    overflow: 'auto',
+    flex: 1,
+  },
+
+  // Modal Divider
+  modalDivider: {
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent, #e2e8f0, transparent)',
+    margin: '30px 0',
+    position: 'relative',
+  },
+
+  // Special Assistance Selection Styles (for modal)
+  assistanceSelectionSection: {
+    marginBottom: '0',
+  },
+
+  selectionTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: '8px',
+    textAlign: 'center',
+  },
+
+  selectionSubtitle: {
+    fontSize: '0.95rem',
+    color: '#6c757d',
+    textAlign: 'center',
+    marginBottom: '25px',
+  },
+
+  passengerAssistanceCard: {
+    background: 'white',
+    borderRadius: '12px',
+    padding: '20px',
+    marginBottom: '20px',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+    border: '1px solid rgba(0, 123, 255, 0.1)',
+    transition: 'all 0.3s ease',
+  },
+
+  passengerAssistanceHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '18px',
+    paddingBottom: '12px',
+    borderBottom: '2px solid #f8f9fa',
+  },
+
+  passengerIcon: {
+    fontSize: '1.1rem',
+    background: 'linear-gradient(135deg, #007bff, #0056b3)',
+    color: 'white',
+    borderRadius: '50%',
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+  },
+
+  passengerAssistanceName: {
+    fontSize: '1.05rem',
+    fontWeight: '600',
+    color: '#2c3e50',
+    lineHeight: '1.3',
+  },
+
+  assistanceOptionsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '12px',
+  },
+
+  assistanceOption: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px',
+    border: '2px solid #e9ecef',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    background: 'white',
+  },
+
+  assistanceCheckbox: {
+    width: '18px',
+    height: '18px',
+    cursor: 'pointer',
+    accentColor: '#007bff',
+  },
+
+  assistanceOptionContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flex: 1,
+  },
+
+  assistanceOptionIcon: {
+    fontSize: '1.2rem',
+  },
+
+  assistanceOptionLabel: {
+    fontSize: '0.9rem',
+    color: '#495057',
+    fontWeight: '500',
+  },
+
+  // Modal Content Styles
+  serviceAnimalInfo: {
+    padding: '0',
+  },
+
+  infoTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: '20px',
+    textAlign: 'center',
+  },
+
+  infoGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '20px',
+    marginBottom: '25px',
+  },
+
+  infoCard: {
+    background: 'white',
+    borderRadius: '12px',
+    padding: '20px',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+    border: '1px solid rgba(0, 0, 0, 0.05)',
+  },
+
+  infoCardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    marginBottom: '12px',
+  },
+
+  cardIcon: {
+    fontSize: '1.5rem',
+  },
+
+  cardTitle: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#2c3e50',
+  },
+
+  cardText: {
+    fontSize: '0.9rem',
+    color: '#495057',
+    lineHeight: '1.5',
+    margin: 0,
+  },
+
+  documentList: {
+    fontSize: '0.9rem',
+    color: '#495057',
+    lineHeight: '1.6',
+    margin: 0,
+    paddingLeft: '20px',
+  },
+
+  requirementsList: {
+    fontSize: '0.9rem',
+    color: '#495057',
+    lineHeight: '1.6',
+    margin: 0,
+    paddingLeft: '20px',
+  },
+
+  importantNotice: {
+    background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05))',
+    border: '1px solid rgba(255, 193, 7, 0.3)',
+    borderRadius: '12px',
+    padding: '20px',
+    marginTop: '25px',
+  },
+
+  noticeHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    marginBottom: '12px',
+  },
+
+  noticeIcon: {
+    fontSize: '1.3rem',
+  },
+
+  noticeTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    color: '#856404',
+  },
+
+  noticeContent: {
+    paddingLeft: '35px',
+  },
+
+  noticeText: {
+    fontSize: '0.9rem',
+    color: '#856404',
+    margin: '0 0 8px 0',
+    lineHeight: '1.5',
+  },
 };

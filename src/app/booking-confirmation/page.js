@@ -48,6 +48,10 @@ export default function BookingConfirmationPage() {
       setSelectedFlight(flight);
       setPassengerDetails(passengers);
       
+      // Handle both old array format and new object format for display
+      const passengerList = Array.isArray(passengers) ? passengers : (passengers?.passengers || []);
+      setPassengerDetails(passengerList);
+      
       // Check if booking was already saved in this session
       if (!bookingSaved) {
         // Generate booking ID and PNR once
@@ -59,6 +63,9 @@ export default function BookingConfirmationPage() {
         // Save booking to localStorage
         const seatSelectionData = localStorage.getItem('seatSelection');
         const seatSelection = seatSelectionData ? JSON.parse(seatSelectionData) : null;
+        
+        // Handle both old array format and new object format for passengers
+        const passengerList = Array.isArray(passengers) ? passengers : (passengers?.passengers || []);
         
         const booking = {
           bookingId: newBookingId,
@@ -73,7 +80,7 @@ export default function BookingConfirmationPage() {
             departureDate: flight.searchCriteria?.departureDate || 'Not specified',
             duration: flight.duration || 'N/A'
           },
-          passengers: passengers,
+          passengers: passengerList, // Always store as array for consistency
           seatSelection: seatSelection, // Include seat selection data
           status: 'Upcoming',
           bookingDate: new Date().toISOString()

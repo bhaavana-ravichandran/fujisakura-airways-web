@@ -12,6 +12,9 @@ export default function PassengerSeatSummary({
   businessFareType = 'flex',
   totalPrice 
 }) {
+  // Handle both old array format and new object format
+  const passengerList = Array.isArray(passengers) ? passengers : (passengers?.passengers || []);
+  
   const getPassengerSeat = (passenger) => {
     const passengerKey = `${passenger.firstName}_${passenger.lastName}`;
     return selectedSeats[passengerKey] || null;
@@ -23,7 +26,7 @@ export default function PassengerSeatSummary({
     return '🧒';
   };
 
-  const allPassengersSeated = Object.keys(selectedSeats).length === passengers.length;
+  const allPassengersSeated = Object.keys(selectedSeats).length === passengerList.length;
 
   return (
     <div style={styles.summaryContainer}>
@@ -32,13 +35,13 @@ export default function PassengerSeatSummary({
         <h3 style={styles.summaryTitle}>Seat Selection Summary</h3>
         <div style={styles.progressIndicator}>
           <span style={styles.progressText}>
-            {Object.keys(selectedSeats).length} of {passengers.length} passengers
+            {Object.keys(selectedSeats).length} of {passengerList.length} passengers
           </span>
           <div style={styles.progressBar}>
             <div 
               style={{
                 ...styles.progressFill,
-                width: `${(Object.keys(selectedSeats).length / passengers.length) * 100}%`
+                width: `${(Object.keys(selectedSeats).length / passengerList.length) * 100}%`
               }}
             />
           </div>
@@ -47,7 +50,7 @@ export default function PassengerSeatSummary({
 
       {/* Passenger List */}
       <div style={styles.passengerList}>
-        {passengers.map((passenger, index) => {
+        {passengerList.map((passenger, index) => {
           const seat = getPassengerSeat(passenger);
           const hasSelectedSeat = !!seat;
           let seatPrice = 0;
