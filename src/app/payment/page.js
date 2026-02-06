@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import Toast from '../../components/Toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { handleAlphabetsOnly, handleDigitsOnly } from '../../utils/inputValidation';
 import { formatPrice, getCurrencyFromData } from '../../utils/currency';
+import authManager from '../../utils/auth';
 import '../../styles/globals.css';
 
 export default function PaymentPage() {
@@ -17,7 +19,6 @@ export default function PaymentPage() {
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [passengerDetails, setPassengerDetails] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [activePaymentMethod, setActivePaymentMethod] = useState('card');
   const [termsAccepted, setTermsAccepted] = useState(false);
   
@@ -53,6 +54,19 @@ export default function PaymentPage() {
   
   // Special assistance state
   const [specialAssistanceSelection, setSpecialAssistanceSelection] = useState(null);
+
+  // Frontend-only authentication state (no backend)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthGate, setShowAuthGate] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: '',
+    type: 'success'
+  });
 
   useEffect(() => {
     const flightData = localStorage.getItem('selectedFlight');
@@ -103,6 +117,27 @@ export default function PaymentPage() {
       console.error('Error parsing data:', error);
       router.push('/home');
     }
+
+    // Check authentication state
+    const checkAuthState = () => {
+      const isLoggedIn = authManager.isLoggedIn();
+      setIsAuthenticated(isLoggedIn);
+      setShowAuthGate(!isLoggedIn);
+    };
+
+    checkAuthState();
+
+    // Listen for auth state changes
+    const handleAuthChange = (authState) => {
+      setIsAuthenticated(authState.isAuthenticated);
+      setShowAuthGate(!authState.isAuthenticated);
+    };
+
+    authManager.addListener(handleAuthChange);
+
+    return () => {
+      authManager.removeListener(handleAuthChange);
+    };
   }, [router]);
 
   // Helper function to get readable assistance labels
@@ -146,15 +181,20 @@ export default function PaymentPage() {
       alert('Please accept the terms and conditions to proceed.');
       return;
     }
-    setShowToast(true);
-  };
-
-  const handleToastClose = () => {
-    setShowToast(false);
-    sessionStorage.removeItem('bookingSaved');
-    sessionStorage.removeItem('currentBookingId');
-    sessionStorage.removeItem('currentPnr');
-    router.push('/booking-confirmation');
+    
+    // Show demo payment toast
+    showToast('Payment integration will be implemented in a later phase.', 'info');
+    
+    // Navigate to booking confirmation after a short delay
+    setTimeout(() => {
+      // Clear any existing booking data
+      sessionStorage.removeItem('bookingSaved');
+      sessionStorage.removeItem('currentBookingId');
+      sessionStorage.removeItem('currentPnr');
+      
+      // Navigate to booking confirmation
+      router.push('/booking-confirmation');
+    }, 2000); // 2 second delay to show the toast
   };
 
   const formatCityName = (cityCode) => {
@@ -280,6 +320,41 @@ export default function PaymentPage() {
     { name: 'Amazon Pay', icon: '🛒' }
   ];
 
+  const showToast = (message, type = 'success') => {
+    setToast({
+      isVisible: true,
+      message,
+      type
+    });
+  };
+
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
+
+  // Frontend-only authentication functions (no backend logic)
+  const handleSignInClick = () => {
+    setShowSignInModal(true);
+  };
+
+  const handleCreateAccountClick = () => {
+    setShowCreateAccountModal(true);
+  };
+
+  const handleAuthSuccess = (message, type) => {
+    // Frontend-only: authentication handled by auth manager
+    setIsAuthenticated(true);
+    setShowAuthGate(false);
+    setShowSignInModal(false);
+    setShowCreateAccountModal(false);
+    showToast(message, type);
+  };
+
+  const closeAuthModals = () => {
+    setShowSignInModal(false);
+    setShowCreateAccountModal(false);
+  };
+
   if (!selectedFlight || !passengerDetails.length || !isLoaded) {
     return (
       <div style={styles.pageContainer}>
@@ -300,7 +375,44 @@ export default function PaymentPage() {
         <div style={styles.contentWrapper}>
           <h1 style={styles.pageTitle}>Complete Your Payment</h1>
           
-          <div style={styles.paymentContainer}>
+          {/* Authentication Gate - Frontend Only */}
+          {showAuthGate && !isAuthenticated ? (
+            <div style={styles.authGateContainer}>
+              <Card style={styles.authGateCard}>
+                <CardHeader>
+                  <CardTitle style={styles.authGateTitle}>
+                    🔒 Sign In Required
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div style={styles.authGateContent}>
+                    <p style={styles.authGateMessage}>
+                      Please sign in or create an account to complete your booking and proceed with payment.
+                    </p>
+                    <div style={styles.authGateButtons}>
+                      <Button 
+                        onClick={handleSignInClick}
+                        style={styles.authSignInButton}
+                      >
+                        Sign In
+                      </Button>
+                      <Button 
+                        onClick={handleCreateAccountClick}
+                        style={styles.authCreateAccountButton}
+                      >
+                        Create Account
+                      </Button>
+                    </div>
+                    <p style={styles.authGateNote}>
+                      Your booking details are saved and will be available after signing in.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            // Original Payment Content (only shown when authenticated)
+            <div style={styles.paymentContainer}>
             {/* Payment Summary */}
             <div style={styles.summarySection}>
               <Card style={styles.summaryCard}>
@@ -911,29 +1023,391 @@ export default function PaymentPage() {
               </div>
             </div>
           </div>
+          )}
         </div>
       </main>
 
       <Footer />
 
-      {/* Toast Modal */}
-      {showToast && (
-        <div style={styles.toastOverlay} onClick={handleToastClose}>
-          <div style={styles.toastModal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.toastContent}>
-              <div style={styles.toastIcon}>ℹ️</div>
-              <h3 style={styles.toastTitle}>Demo Payment</h3>
-              <p style={styles.toastMessage}>
-                Payment integration will be implemented in a later phase.
-              </p>
-              <Button onClick={handleToastClose} style={styles.toastButton}>
-                OK
-              </Button>
+      {/* Authentication Modals - Frontend Only */}
+      {showSignInModal && (
+        <div style={authModalStyles.overlay} onClick={closeAuthModals}>
+          <div style={authModalStyles.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={authModalStyles.header}>
+              <h2 style={authModalStyles.title}>Sign In</h2>
+              <button onClick={closeAuthModals} style={authModalStyles.closeButton}>×</button>
+            </div>
+            <div style={authModalStyles.content}>
+              <AuthSignInForm onSuccess={handleAuthSuccess} onForgotPassword={() => {
+                closeAuthModals();
+                window.location.href = '/forgot-password';
+              }} />
             </div>
           </div>
         </div>
       )}
+
+      {showCreateAccountModal && (
+        <div style={authModalStyles.overlay} onClick={closeAuthModals}>
+          <div style={authModalStyles.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={authModalStyles.header}>
+              <h2 style={authModalStyles.title}>Create Account</h2>
+              <button onClick={closeAuthModals} style={authModalStyles.closeButton}>×</button>
+            </div>
+            <div style={authModalStyles.content}>
+              <AuthCreateAccountForm onSuccess={handleAuthSuccess} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
+  );
+}
+
+// Enhanced Authentication Form Components (Frontend Only) - Same as Header
+function AuthSignInForm({ onSuccess, onForgotPassword }) {
+  const [formData, setFormData] = useState({
+    emailOrPhone: '',
+    password: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [loginMethod, setLoginMethod] = useState('email'); // 'email' or 'phone'
+
+  // Detect if input is email or phone
+  const detectLoginMethod = (value) => {
+    const phoneRegex = /^[0-9]{10}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (phoneRegex.test(value.replace(/\D/g, ''))) {
+      setLoginMethod('phone');
+    } else if (emailRegex.test(value)) {
+      setLoginMethod('email');
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.emailOrPhone.trim()) {
+      newErrors.emailOrPhone = 'Email or phone number is required';
+    } else {
+      const phoneRegex = /^[0-9]{10}$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const cleanPhone = formData.emailOrPhone.replace(/\D/g, '');
+      
+      if (!emailRegex.test(formData.emailOrPhone) && !phoneRegex.test(cleanPhone)) {
+        newErrors.emailOrPhone = 'Please enter a valid email or 10-digit phone number';
+      }
+    }
+    
+    if (!formData.password.trim()) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (field, value) => {
+    if (field === 'emailOrPhone') {
+      // Allow only digits for phone or email format
+      if (/^\d+$/.test(value)) {
+        // If only digits, limit to 10 and format as phone
+        value = value.slice(0, 10);
+      }
+      detectLoginMethod(value);
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      // Frontend-only: simulate successful authentication
+      const userData = {
+        email: formData.emailOrPhone,
+        fullName: 'Demo User',
+        loginMethod: loginMethod
+      };
+      
+      // Sign in through auth manager
+      authManager.signIn(userData);
+      
+      // Show success toast and close modal
+      setTimeout(() => {
+        onSuccess('Successfully signed in!', 'success');
+      }, 500);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={authFormStyles.form}>
+      <div style={authFormStyles.formGroup}>
+        <label style={authFormStyles.label}>
+          Email or Phone Number
+        </label>
+        <input 
+          type="text"
+          value={formData.emailOrPhone}
+          onChange={(e) => handleInputChange('emailOrPhone', e.target.value)}
+          placeholder={loginMethod === 'phone' ? 'Enter 10-digit phone number' : 'Enter your email or phone'}
+          style={{
+            ...authFormStyles.input,
+            borderColor: errors.emailOrPhone ? '#ef4444' : '#d1d5db'
+          }}
+          required
+        />
+        {errors.emailOrPhone && (
+          <span style={authFormStyles.errorText}>{errors.emailOrPhone}</span>
+        )}
+        <div style={authFormStyles.helperText}>
+          {loginMethod === 'phone' ? '📱 Phone number detected' : '📧 Email format detected'}
+        </div>
+      </div>
+      
+      <div style={authFormStyles.formGroup}>
+        <label style={authFormStyles.label}>Password</label>
+        <input 
+          type="password"
+          value={formData.password}
+          onChange={(e) => handleInputChange('password', e.target.value)}
+          placeholder="Enter your password"
+          style={{
+            ...authFormStyles.input,
+            borderColor: errors.password ? '#ef4444' : '#d1d5db'
+          }}
+          required
+        />
+        {errors.password && (
+          <span style={authFormStyles.errorText}>{errors.password}</span>
+        )}
+      </div>
+      
+      <button type="submit" style={authFormStyles.submitButton}>
+        Sign In
+      </button>
+      
+      <div style={authFormStyles.linkContainer}>
+        <button 
+          type="button"
+          onClick={onForgotPassword}
+          style={authFormStyles.link}
+        >
+          Forgot your password?
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function AuthCreateAccountForm({ onSuccess }) {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Full Name validation
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = 'Full name must be at least 2 characters';
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.fullName)) {
+      newErrors.fullName = 'Full name can only contain letters and spaces';
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Phone validation
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
+    } else if (!phoneRegex.test(formData.phoneNumber.replace(/\D/g, ''))) {
+      newErrors.phoneNumber = 'Please enter a valid 10-digit phone number';
+    }
+    
+    // Password validation
+    if (!formData.password.trim()) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    
+    // Confirm Password validation
+    if (!formData.confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (field, value) => {
+    if (field === 'fullName') {
+      // Only allow letters and spaces
+      value = value.replace(/[^a-zA-Z\s]/g, '');
+    } else if (field === 'phoneNumber') {
+      // Only allow digits, limit to 10
+      value = value.replace(/\D/g, '').slice(0, 10);
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      // Frontend-only: simulate successful account creation
+      const userData = {
+        email: formData.email,
+        fullName: formData.fullName,
+        phoneNumber: formData.phoneNumber
+      };
+      
+      // Sign in through auth manager
+      authManager.signIn(userData);
+      
+      // Show success toast and close modal
+      setTimeout(() => {
+        onSuccess('Account created successfully!', 'success');
+      }, 500);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={authFormStyles.form}>
+      <div style={authFormStyles.formGroup}>
+        <label style={authFormStyles.label}>Full Name</label>
+        <input 
+          type="text"
+          value={formData.fullName}
+          onChange={(e) => handleInputChange('fullName', e.target.value)}
+          placeholder="Enter your full name"
+          style={{
+            ...authFormStyles.input,
+            borderColor: errors.fullName ? '#ef4444' : '#d1d5db'
+          }}
+          required
+        />
+        {errors.fullName && (
+          <span style={authFormStyles.errorText}>{errors.fullName}</span>
+        )}
+      </div>
+      
+      <div style={authFormStyles.formGroup}>
+        <label style={authFormStyles.label}>Email Address</label>
+        <input 
+          type="email"
+          value={formData.email}
+          onChange={(e) => handleInputChange('email', e.target.value)}
+          placeholder="Enter your email address"
+          style={{
+            ...authFormStyles.input,
+            borderColor: errors.email ? '#ef4444' : '#d1d5db'
+          }}
+          required
+        />
+        {errors.email && (
+          <span style={authFormStyles.errorText}>{errors.email}</span>
+        )}
+      </div>
+      
+      <div style={authFormStyles.formGroup}>
+        <label style={authFormStyles.label}>Phone Number</label>
+        <input 
+          type="tel"
+          value={formData.phoneNumber}
+          onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+          placeholder="Enter 10-digit phone number"
+          style={{
+            ...authFormStyles.input,
+            borderColor: errors.phoneNumber ? '#ef4444' : '#d1d5db'
+          }}
+          required
+        />
+        {errors.phoneNumber && (
+          <span style={authFormStyles.errorText}>{errors.phoneNumber}</span>
+        )}
+        <div style={authFormStyles.helperText}>
+          📱 We'll use this for booking confirmations
+        </div>
+      </div>
+      
+      <div style={authFormStyles.formGroup}>
+        <label style={authFormStyles.label}>Password</label>
+        <input 
+          type="password"
+          value={formData.password}
+          onChange={(e) => handleInputChange('password', e.target.value)}
+          placeholder="Create a password (min 6 characters)"
+          style={{
+            ...authFormStyles.input,
+            borderColor: errors.password ? '#ef4444' : '#d1d5db'
+          }}
+          required
+        />
+        {errors.password && (
+          <span style={authFormStyles.errorText}>{errors.password}</span>
+        )}
+      </div>
+      
+      <div style={authFormStyles.formGroup}>
+        <label style={authFormStyles.label}>Confirm Password</label>
+        <input 
+          type="password"
+          value={formData.confirmPassword}
+          onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+          placeholder="Confirm your password"
+          style={{
+            ...authFormStyles.input,
+            borderColor: errors.confirmPassword ? '#ef4444' : '#d1d5db'
+          }}
+          required
+        />
+        {errors.confirmPassword && (
+          <span style={authFormStyles.errorText}>{errors.confirmPassword}</span>
+        )}
+      </div>
+      
+      <button type="submit" style={authFormStyles.submitButton}>
+        Create Account
+      </button>
+    </form>
   );
 }
 const styles = {
@@ -962,6 +1436,83 @@ const styles = {
     color: '#2d3748',
     marginBottom: '2rem',
     textAlign: 'center',
+  },
+
+  // Authentication Gate Styles
+  authGateContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '400px',
+    padding: '2rem'
+  },
+
+  authGateCard: {
+    maxWidth: '500px',
+    width: '100%',
+    background: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: '16px',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)'
+  },
+
+  authGateTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#2c3e50',
+    textAlign: 'center',
+    marginBottom: '1rem'
+  },
+
+  authGateContent: {
+    textAlign: 'center',
+    padding: '1rem'
+  },
+
+  authGateMessage: {
+    fontSize: '1.1rem',
+    color: '#374151',
+    marginBottom: '2rem',
+    lineHeight: '1.6'
+  },
+
+  authGateButtons: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    marginBottom: '1.5rem'
+  },
+
+  authSignInButton: {
+    background: 'linear-gradient(135deg, #007bff, #0056b3)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '0.75rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(0, 123, 255, 0.3)'
+  },
+
+  authCreateAccountButton: {
+    background: 'white',
+    color: '#007bff',
+    border: '2px solid #007bff',
+    borderRadius: '8px',
+    padding: '0.75rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+
+  authGateNote: {
+    fontSize: '0.9rem',
+    color: '#6b7280',
+    fontStyle: 'italic'
   },
   
   backButtonRow: {
@@ -2000,4 +2551,210 @@ const styles = {
     fontWeight: '500',
     lineHeight: '1.4',
   },
+};
+
+// Authentication Gate Styles
+const authGateStyles = {
+  authGateContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '400px',
+    padding: '2rem'
+  },
+
+  authGateCard: {
+    maxWidth: '500px',
+    width: '100%',
+    background: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: '16px',
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)'
+  },
+
+  authGateTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#2c3e50',
+    textAlign: 'center',
+    marginBottom: '1rem'
+  },
+
+  authGateContent: {
+    textAlign: 'center',
+    padding: '1rem'
+  },
+
+  authGateMessage: {
+    fontSize: '1.1rem',
+    color: '#374151',
+    marginBottom: '2rem',
+    lineHeight: '1.6'
+  },
+
+  authGateButtons: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    marginBottom: '1.5rem'
+  },
+
+  authSignInButton: {
+    background: 'linear-gradient(135deg, #007bff, #0056b3)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '0.75rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(0, 123, 255, 0.3)'
+  },
+
+  authCreateAccountButton: {
+    background: 'white',
+    color: '#007bff',
+    border: '2px solid #007bff',
+    borderRadius: '8px',
+    padding: '0.75rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+
+  authGateNote: {
+    fontSize: '0.9rem',
+    color: '#6b7280',
+    fontStyle: 'italic'
+  }
+};
+
+// Authentication Modal Styles
+const authModalStyles = {
+  overlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2000,
+    backdropFilter: 'blur(4px)'
+  },
+
+  modal: {
+    background: 'white',
+    borderRadius: '12px',
+    width: '90%',
+    maxWidth: '400px',
+    maxHeight: '90vh',
+    overflow: 'auto',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)'
+  },
+
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '1.5rem 1.5rem 0 1.5rem',
+    borderBottom: '1px solid #f1f5f9'
+  },
+
+  title: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#1f2937',
+    margin: 0
+  },
+
+  closeButton: {
+    background: 'none',
+    border: 'none',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+    color: '#6b7280',
+    padding: '0.25rem',
+    borderRadius: '4px',
+    transition: 'color 0.2s ease'
+  },
+
+  content: {
+    padding: '1.5rem'
+  }
+};
+
+// Authentication Form Styles
+const authFormStyles = {
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+
+  label: {
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    color: '#374151'
+  },
+
+  input: {
+    padding: '0.75rem',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    fontSize: '1rem',
+    transition: 'border-color 0.2s ease',
+    outline: 'none'
+  },
+
+  submitButton: {
+    background: 'linear-gradient(135deg, #007bff, #0056b3)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '0.75rem 1.5rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    marginTop: '0.5rem'
+  },
+
+  linkContainer: {
+    textAlign: 'center',
+    marginTop: '0.5rem'
+  },
+
+  link: {
+    background: 'none',
+    border: 'none',
+    color: '#007bff',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    textDecoration: 'underline'
+  },
+
+  errorText: {
+    color: '#ef4444',
+    fontSize: '0.8rem',
+    marginTop: '0.25rem'
+  },
+
+  helperText: {
+    color: '#6b7280',
+    fontSize: '0.8rem',
+    marginTop: '0.25rem',
+    fontStyle: 'italic'
+  }
 };

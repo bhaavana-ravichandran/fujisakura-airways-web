@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import BackButton from '../../components/BackButton';
+import Toast from '../../components/Toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatPrice, getCurrencyFromData, CURRENCY_CONFIG } from '../../utils/currency';
@@ -18,7 +19,25 @@ export default function MyBookingsPage() {
   const [expandedBooking, setExpandedBooking] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState(null);
-  const [showToast, setShowToast] = useState(false);
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: '',
+    type: 'success'
+  });
+
+  const showToast = (message, type = 'success') => {
+    setToast({
+      isVisible: true,
+      message,
+      type
+    });
+  };
+
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
 
   useEffect(() => {
     const storedBookings = localStorage.getItem('bookings');
@@ -29,6 +48,13 @@ export default function MyBookingsPage() {
       );
       setBookings(sortedBookings);
       setFilteredBookings(sortedBookings);
+      
+      // Check if user came from booking confirmation
+      const fromBookingConfirmation = sessionStorage.getItem('fromBookingConfirmation');
+      if (fromBookingConfirmation) {
+        showToast('🎉 Welcome to My Bookings! Your latest booking is now saved here.', 'success');
+        sessionStorage.removeItem('fromBookingConfirmation');
+      }
     }
   }, []);
 
@@ -61,11 +87,7 @@ export default function MyBookingsPage() {
     
     setShowCancelModal(false);
     setBookingToCancel(null);
-    setShowToast(true);
-    
-    setTimeout(() => {
-      setShowToast(false);
-    }, 3000);
+    showToast('Booking cancelled successfully!', 'success');
   };
 
   const toggleExpandBooking = (bookingId) => {
@@ -279,12 +301,13 @@ export default function MyBookingsPage() {
         </div>
       )}
 
-      {showToast && (
-        <div style={styles.toast}>
-          <span style={styles.toastIcon}>✓</span>
-          Booking cancelled successfully
-        </div>
-      )}
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 }

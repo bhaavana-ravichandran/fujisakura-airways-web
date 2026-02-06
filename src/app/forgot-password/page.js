@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { isValidEmail } from '../../utils/inputValidation';
+import Toast from '../../components/Toast';
 import '../../styles/globals.css';
 
 export default function ForgotPasswordPage() {
@@ -14,6 +15,25 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: '',
+    type: 'success'
+  });
+
+  const showToast = (message, type = 'success') => {
+    setToast({
+      isVisible: true,
+      message,
+      type
+    });
+  };
+
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
 
   const handleInputChange = (e) => {
     const { value } = e.target;
@@ -51,9 +71,11 @@ export default function ForgotPasswordPage() {
       
       // Show success state
       setIsSubmitted(true);
+      showToast('Password reset instructions sent to your email!', 'success');
       
     } catch (error) {
       setError('Failed to send reset instructions. Please try again.');
+      showToast('Failed to send reset instructions. Please try again.', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -164,7 +186,7 @@ export default function ForgotPasswordPage() {
                   Send Another Email
                 </Button>
                 
-                <Link href="/login" style={{ textDecoration: 'none' }}>
+                <Link href="/home" style={{ textDecoration: 'none' }}>
                   <Button 
                     style={{
                       background: '#f8f9fa',
@@ -179,13 +201,21 @@ export default function ForgotPasswordPage() {
                       width: '100%'
                     }}
                   >
-                    Back to Login
+                    Back to Home
                   </Button>
                 </Link>
               </div>
             </CardContent>
           </Card>
         </main>
+
+        {/* Toast Notification */}
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          isVisible={toast.isVisible}
+          onClose={hideToast}
+        />
       </div>
     );
   }
@@ -311,8 +341,8 @@ export default function ForgotPasswordPage() {
 
             <div style={styles.linkContainer}>
               Remember your password?{' '}
-              <Link href="/login" style={styles.link}>
-                Back to Login
+              <Link href="/home" style={styles.link}>
+                Back to Home
               </Link>
             </div>
 
@@ -325,6 +355,14 @@ export default function ForgotPasswordPage() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import Toast from '../../components/Toast';
 import { formatPrice, getCurrencyFromData } from '../../utils/currency';
 
 export default function BookingConfirmationPage() {
@@ -13,6 +14,26 @@ export default function BookingConfirmationPage() {
   const [bookingId, setBookingId] = useState('');
   const [pnr, setPnr] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [autoRedirectCountdown, setAutoRedirectCountdown] = useState(10);
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: '',
+    type: 'success'
+  });
+
+  const showToast = (message, type = 'success') => {
+    setToast({
+      isVisible: true,
+      message,
+      type
+    });
+  };
+
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
 
   // Generate random booking ID and PNR
   const generateBookingId = () => {
@@ -102,11 +123,33 @@ export default function BookingConfirmationPage() {
       }
       
       setIsLoaded(true);
+      
+      // Show success toast
+      showToast('🎉 Booking confirmed successfully! You will be redirected to My Bookings shortly.', 'success');
+      
     } catch (error) {
       console.error('Error parsing data:', error);
       router.push('/home');
     }
   }, [router]);
+
+  // Auto-redirect countdown effect
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const countdown = setInterval(() => {
+      setAutoRedirectCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdown);
+          handleViewBookings();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, [isLoaded]);
 
   const formatCityName = (cityCode) => {
     if (!cityCode) return '';
@@ -128,7 +171,14 @@ export default function BookingConfirmationPage() {
     sessionStorage.removeItem('bookingSaved');
     sessionStorage.removeItem('currentBookingId');
     sessionStorage.removeItem('currentPnr');
-    router.push('/my-bookings');
+    
+    // Set flag to show welcome toast in my-bookings
+    sessionStorage.setItem('fromBookingConfirmation', 'true');
+    
+    showToast('Redirecting to My Bookings...', 'info');
+    setTimeout(() => {
+      router.push('/my-bookings');
+    }, 1000);
   };
 
   if (!selectedFlight || !passengerDetails.length || !isLoaded) {
@@ -158,6 +208,19 @@ export default function BookingConfirmationPage() {
             <div style={styles.successIcon}>✓</div>
             <h1 style={styles.title}>Booking Confirmed!</h1>
             <p style={styles.subtitle}>Your flight has been successfully booked</p>
+            
+            {/* Auto-redirect notification */}
+            <div style={styles.autoRedirectNotice}>
+              <p style={styles.redirectText}>
+                🚀 Automatically redirecting to My Bookings in <strong>{autoRedirectCountdown}</strong> seconds
+              </p>
+              <button 
+                onClick={handleViewBookings}
+                style={styles.redirectNowButton}
+              >
+                Go Now
+              </button>
+            </div>
           </div>
 
           {/* Booking Identifiers */}
@@ -266,6 +329,15 @@ export default function BookingConfirmationPage() {
       <div className="relative z-20">
         <Footer />
       </div>
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+        duration={5000}
+      />
     </div>
   );
 }
@@ -309,6 +381,38 @@ const styles = {
   confirmationHeader: {
     textAlign: 'center',
     marginBottom: '40px'
+  },
+  
+  autoRedirectNotice: {
+    marginTop: '30px',
+    padding: '20px',
+    background: 'linear-gradient(135deg, #e3f2fd, #f3e5f5)',
+    borderRadius: '12px',
+    border: '2px solid #bbdefb',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '15px'
+  },
+  
+  redirectText: {
+    fontSize: '1rem',
+    color: '#1565c0',
+    margin: 0,
+    fontWeight: '500'
+  },
+  
+  redirectNowButton: {
+    background: 'linear-gradient(135deg, #2196f3, #1976d2)',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)'
   },
   
   successIcon: {

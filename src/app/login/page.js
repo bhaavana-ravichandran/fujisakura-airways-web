@@ -1,80 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { isValidEmail } from '../../utils/inputValidation';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    identifier: '', // Can be email or phone
-    password: ''
-  });
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Basic validation
-    const newErrors = {};
-    if (!formData.identifier.trim()) {
-      newErrors.identifier = 'Email or phone number is required';
-    }
-    if (!formData.password.trim()) {
-      newErrors.password = 'Password is required';
-    }
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    setIsLoading(true);
-    setErrors({});
-
-    try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock validation - in real app, this would be API call
-      console.log('Login attempt:', {
-        identifier: formData.identifier,
-        // Don't log passwords in production
-      });
-      
-      // Successful login - redirect to home page
-      router.push('/home');
-      
-    } catch (error) {
-      setErrors({
-        general: 'Login failed. Please check your credentials and try again.'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Redirect to home immediately since we use modal system now
+  useEffect(() => {
+    router.push('/home');
+  }, [router]);
 
   return (
     <div style={styles.container}>
@@ -107,146 +47,17 @@ export default function LoginPage() {
             border: '1px solid rgba(255, 255, 255, 0.2)',
             maxWidth: '320px',
             width: '320px',
-            minHeight: '380px'
+            minHeight: '200px'
           }}
         >
-          <CardHeader style={{ textAlign: 'center', padding: '1.5rem 1.25rem 1rem 1.25rem' }}>
-            <CardTitle 
-              style={{
-                fontSize: '1.4rem',
-                fontWeight: '600',
-                color: '#2d3748',
-                marginBottom: '0.5rem'
-              }}
-            >
-              Welcome Back
-            </CardTitle>
-            <CardDescription 
-              style={{
-                color: '#718096',
-                fontSize: '0.9rem',
-                lineHeight: '1.4'
-              }}
-            >
-              Sign in to your account
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent style={{ padding: '0 1.25rem 1.5rem 1.25rem' }}>
-            {errors.general && (
-              <div style={styles.errorContainer}>
-                {errors.general}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={styles.formGroup}>
-                <Label 
-                  htmlFor="identifier"
-                  style={{
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    color: '#4a5568',
-                    marginBottom: '0.5rem',
-                    display: 'block'
-                  }}
-                >
-                  Email or Phone Number
-                  <span style={{ color: '#e74c3c', marginLeft: '4px' }}>*</span>
-                </Label>
-                <Input
-                  type="text"
-                  id="identifier"
-                  name="identifier"
-                  value={formData.identifier}
-                  onChange={handleInputChange}
-                  placeholder="Enter your email or phone number"
-                  autoComplete="username"
-                  style={{
-                    padding: '0.75rem 1rem',
-                    border: errors.identifier ? '2px solid #e53e3e' : '2px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.95rem',
-                    transition: 'all 0.3s ease',
-                    outline: 'none',
-                    background: 'white'
-                  }}
-                />
-                {errors.identifier && (
-                  <div style={styles.errorMessage}>{errors.identifier}</div>
-                )}
-              </div>
-
-              <div style={styles.formGroup}>
-                <Label 
-                  htmlFor="password"
-                  style={{
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    color: '#4a5568',
-                    marginBottom: '0.5rem',
-                    display: 'block'
-                  }}
-                >
-                  Password
-                  <span style={{ color: '#e74c3c', marginLeft: '4px' }}>*</span>
-                </Label>
-                <Input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  style={{
-                    padding: '0.75rem 1rem',
-                    border: errors.password ? '2px solid #e53e3e' : '2px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.95rem',
-                    transition: 'all 0.3s ease',
-                    outline: 'none',
-                    background: 'white'
-                  }}
-                />
-                {errors.password && (
-                  <div style={styles.errorMessage}>{errors.password}</div>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isLoading}
-                style={{
-                  background: isLoading ? '#ccc' : 'linear-gradient(135deg, #007bff, #0056b3)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.75rem 1.25rem',
-                  borderRadius: '8px',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.3s ease',
-                  width: '100%',
-                  marginTop: '0.5rem'
-                }}
-              >
-                {isLoading ? 'Signing In...' : 'Sign In'}
-              </Button>
-            </form>
-
-            <div style={styles.linkContainer}>
-              <Link href="/forgot-password" style={styles.link}>
-                Forgot your password?
-              </Link>
-            </div>
-
-            <div style={styles.signupContainer}>
-              Don't have an account?{' '}
-              <Link href="/signup" style={styles.link}>
-                Sign up here
-              </Link>
-            </div>
+          <CardContent style={{ padding: '2rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✈️</div>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2d3748', marginBottom: '1rem' }}>
+              Redirecting...
+            </h2>
+            <p style={{ color: '#718096', fontSize: '1rem' }}>
+              Please use the Sign In option in the header to access your account.
+            </p>
           </CardContent>
         </Card>
       </main>
